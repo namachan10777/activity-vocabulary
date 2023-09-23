@@ -722,9 +722,35 @@ Question:
       doc:
         Indicates that a question has been closed, and answers are no longer accepted.
 
+Application:
+  uri: https://www.w3.org/ns/activitystreams#Application	
+  subtype_name: ApplicationSubtypes
+  extends: [Object]
+  doc: Describes a software application.
 
+Group:
+  uri: https://www.w3.org/ns/activitystreams#Group	
+  subtype_name: GroupSubtypes
+  extends: [Object]
+  doc: Represents a formal or informal collective of Actors.
 
+Organization:
+  uri: https://www.w3.org/ns/activitystreams#Organization	
+  subtype_name: OrganizationSubtypes
+  extends: [Object]
+  doc: Represents an organization.
 
+Person:
+  uri: https://www.w3.org/ns/activitystreams#Person	
+  subtype_name: PersonSubtypes
+  extends: [Object]
+  doc: Represents an individual person.
+
+Service:
+  uri: https://www.w3.org/ns/activitystreams#Service	
+  subtype_name: ServiceSubtypes
+  extends: [Object]
+  doc: Represents a service of any kind.
 
 
 

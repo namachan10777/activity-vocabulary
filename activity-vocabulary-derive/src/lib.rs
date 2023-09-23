@@ -125,6 +125,7 @@ fn collect_properties(
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()
         .flatten()
+        .filter(|(name, _)| !def.except_properties.contains(name))
         .collect::<Vec<_>>();
     properties.append(
         &mut def
@@ -613,7 +614,7 @@ fn generate_subtypes(name: &str, defs: &HashMap<String, TypeDef>) -> anyhow::Res
                     }
                 })
                 .collect::<TokenStream>();
-            let fill_properties = sub_properties
+            let fill_properties = super_properties
                 .iter()
                 .filter(|(name, _)| !sub_properties.iter().any(|(sub_name, _)| sub_name == name))
                 .map(|(name, _)| {

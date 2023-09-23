@@ -23,7 +23,7 @@ impl<T: ObjectId> ObjectId for Remotable<T> {
     }
 }
 
-#[derive(PartialEq, Eq, Clone, Debug, Hash)]
+#[derive(PartialEq, Eq, Clone, Debug, Hash, Default)]
 pub struct Property<T>(Vec<T>);
 
 impl<T: Serialize> Serialize for Property<T> {
@@ -134,7 +134,7 @@ impl<T> SkipSerialization for Property<T> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct LangContainer<T> {
     pub default: Option<T>,
     pub per_lang: HashMap<String, T>,

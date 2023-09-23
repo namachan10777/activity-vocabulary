@@ -1,4 +1,12 @@
 [workspace]
+package.version = "0.0.2"
+package.edition = "2021"
+package.authors = ["Masaki Nakano <admin@namachan10777.dev>"]
+package.license = "MIR OR Apache-2.0"
+package.homepage = "https://github.com/namachan10777/activity-vocabulary"
+package.keywords = ["activitypub", "activity-vocabulary", "activity-streams"]
+package.categories = []
+
 members = [
     "activity-vocabulary-core",
     "activity-vocabulary-derive",
@@ -7,3 +15,8 @@ members = [
 resolver = "2"
 
 [workspace.dependencies]
+url = "2"
+serde = "1"
+serde_json = "1"
+chrono = { version = "0.4", default-features = false }
+anyhow = "1"

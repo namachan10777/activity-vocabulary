@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "activity-vocabulary"
-version = "0.1.0"
+version = "0.0.2"
 dependencies = [
  "activity-vocabulary-core",
  "activity-vocabulary-derive",
@@ -14,7 +14,7 @@ dependencies = [
 
 [[package]]
 name = "activity-vocabulary-core"
-version = "0.1.0"
+version = "0.0.2"
 dependencies = [
  "chrono",
  "nom",
@@ -25,7 +25,7 @@ dependencies = [
 
 [[package]]
 name = "activity-vocabulary-derive"
-version = "0.1.0"
+version = "0.0.2"
 dependencies = [
  "anyhow",
  "maplit",

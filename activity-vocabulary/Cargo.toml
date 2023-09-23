@@ -1,0 +1,14 @@
+[package]
+name = "activity-vocabulary"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+activity-vocabulary-derive = { version = "0.1.0", path = "../activity-vocabulary-derive" }
+
+[dependencies]
+activity-vocabulary-core = { version = "0.1.0", path = "../activity-vocabulary-core" }
+serde = { version = "1.0.188", features = ["derive"] }
+url = { version = "2.4.1", features = ["serde"] }

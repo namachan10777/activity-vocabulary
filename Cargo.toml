@@ -1,0 +1,9 @@
+[workspace]
+members = [
+    "activity-vocabulary-core",
+    "activity-vocabulary-derive",
+    "activity-vocabulary",
+]
+resolver = "2"
+
+[workspace.dependencies]

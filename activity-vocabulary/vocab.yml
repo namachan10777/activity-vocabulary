@@ -1,0 +1,59 @@
+Object:
+  extends: []
+  properties:
+    object_type:
+      type: Option<url::Url>
+      rename: type
+      uri: "@type"
+      doc: Kind of [Object]
+      kind: !Required
+
+    id:
+      type: Option<url::Url>
+      uri: "@id"
+      doc: Id of [Object]
+      kind: !Functional
+
+    attachment:
+      type: Or<Remotable<Object>, Link>
+      uri: https://www.w3.org/ns/activitystreams#attributedTo
+      doc: |
+        [W3C recommendation](https://www.w3.org/TR/activitystreams-vocabulary/#dfn-attachment)
+        uri: `https://www.w3.org/ns/activitystreams#attributedTo`
+        Identifies a resource attached or related to an object that potentially requires special handling.
+        The intent is to provide a model that is at least semantically similar to attachments in email.
+
+    attributed_to:
+      type: Or<Remotable<Object>, Link>
+      rename: attributedTo
+      uri: https://www.w3.org/ns/activitystreams#attributedTo
+      doc: |
+        Identifies one or more entities to which this object is attributed.
+        The attributed entities might not be Actors. For instance, an object might be attributed to the completion of another activity.
+
+    audience:
+      type: Or<Remotable<Object>, Link>
+      uri: https://www.w3.org/ns/activitystreams#audience
+      doc: |
+        Identifies one or more entities that represent the total population of entities
+        for which the object can considered to be relevant.
+
+    content:
+      type: String
+      uri: https://www.w3.org/ns/activitystreams#content
+      container:
+        type: !Language
+        name: contentMap
+      doc: |
+        The content or textual representation of the Object encoded as a JSON string.
+        By default, the value of content is HTML.
+        The [Object::media_type] property
+        can be used in the object to indicate a different content type.
+        The content may be expressed using multiple language-tagged values.
+Link:
+  extends: []
+  as_object_id: false
+  properties: {}
+Activity:
+  extends: [Object]
+  properties: {}

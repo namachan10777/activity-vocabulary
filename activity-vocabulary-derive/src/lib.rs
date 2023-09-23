@@ -200,7 +200,16 @@ fn generate_serialize_impl(
                     };
                     Ok(tag)
                 }).unwrap_or_else(|| Ok(&tag))?;
-                Ok(quote! { serializer.serialize_entry(#tag, &self.#name_ident)?; })
+                if property_def.kind != PropertyKind::Required {
+                    Ok(quote! {
+                        if !activity_vocabulary_core::SkipSerialization::should_skip(&self.#name_ident) {
+                            serializer.serialize_entry(#tag, &self.#name_ident)?;
+                        }
+                    })
+                }
+                else {
+                    Ok(quote! { serializer.serialize_entry(#tag, &self.#name_ident)?; })
+                }
             }
         })
         .collect::<anyhow::Result<Vec<_>>>()?

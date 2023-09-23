@@ -1,6 +1,6 @@
 use std::{collections::HashMap, hash::Hash};
 
-use serde::{Deserialize, Serialize};
+use serde::{de::Visitor, ser::SerializeSeq, Deserialize, Serialize};
 
 pub mod xsd;
 
@@ -179,4 +179,151 @@ impl<T: MergeableProperty> MergeableProperty for Option<T> {
             (None, None) => (),
         }
     }
+}
+
+#[derive(PartialEq, Eq, Clone, Debug)]
+pub struct Context {
+    urls: Vec<url::Url>,
+    inline: HashMap<String, String>,
+}
+
+impl Serialize for Context {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        if self.inline.is_empty() {
+            if let &[url] = &self.urls.as_slice() {
+                url.serialize(serializer)
+            } else {
+                self.urls.serialize(serializer)
+            }
+        } else {
+            if self.urls.is_empty() {
+                self.inline.serialize(serializer)
+            } else {
+                let mut serializer = serializer.serialize_seq(Some(self.urls.len() + 1))?;
+                for url in &self.urls {
+                    serializer.serialize_element(url)?;
+                }
+                serializer.serialize_element(&self.inline)?;
+                serializer.end()
+            }
+        }
+    }
+}
+
+enum ContextArrayElement {
+    Url(url::Url),
+    Inline(HashMap<String, String>),
+}
+
+struct ContextArrayElementVisitor;
+impl<'de> Visitor<'de> for ContextArrayElementVisitor {
+    type Value = ContextArrayElement;
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("element of @context[]")
+    }
+
+    fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::MapAccess<'de>,
+    {
+        let mut r = HashMap::new();
+        while let Some((k, v)) = map.next_entry::<String, String>()? {
+            r.insert(k, v);
+        }
+        Ok(ContextArrayElement::Inline(r))
+    }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(ContextArrayElement::Url(
+            v.parse().map_err(serde::de::Error::custom)?,
+        ))
+    }
+}
+
+impl<'de> Deserialize<'de> for ContextArrayElement {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_any(ContextArrayElementVisitor)
+    }
+}
+
+struct ContextVisitor;
+impl<'de> Visitor<'de> for ContextVisitor {
+    type Value = Context;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("@context")
+    }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        let visitor = ContextArrayElementVisitor;
+        let ContextArrayElement::Url(url) = visitor.visit_str(v)? else {
+            unreachable!()
+        };
+        Ok(Self::Value {
+            urls: vec![url],
+            inline: Default::default(),
+        })
+    }
+
+    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::SeqAccess<'de>,
+    {
+        let mut inline = HashMap::new();
+        let mut urls = Vec::new();
+        while let Some(element) = seq.next_element::<ContextArrayElement>()? {
+            match element {
+                ContextArrayElement::Inline(new) => {
+                    inline.extend(new);
+                }
+                ContextArrayElement::Url(url) => {
+                    urls.push(url);
+                }
+            }
+        }
+        Ok(Self::Value { inline, urls })
+    }
+
+    fn visit_map<A>(self, map: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::MapAccess<'de>,
+    {
+        let visitor = ContextArrayElementVisitor;
+        let ContextArrayElement::Inline(inline) = visitor.visit_map(map)? else {
+            unreachable!()
+        };
+        Ok(Self::Value {
+            inline,
+            urls: Default::default(),
+        })
+    }
+}
+
+impl<'de> Deserialize<'de> for Context {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_any(ContextVisitor)
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct WithContext<T> {
+    #[serde(rename = "@context")]
+    pub context: Context,
+    #[serde(flatten)]
+    pub body: T,
 }

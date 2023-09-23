@@ -9,6 +9,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = { version = "1.0.75", features = ["backtrace"] }
+maplit = "1.0.2"
 proc-macro2 = "1.0.67"
 quote = "1.0.33"
 rust-format = { version = "0.3.4", features = ["token_stream"] }

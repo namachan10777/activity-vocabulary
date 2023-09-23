@@ -1,11 +1,15 @@
-use std::{collections::HashMap, fs, path::Path};
+use std::{
+    collections::{HashMap, HashSet},
+    fs,
+    path::Path,
+};
 
-use anyhow::Context;
+use anyhow::{bail, Context};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens, TokenStreamExt};
 use rust_format::{Formatter, RustFmt};
 use serde::{Deserialize, Serialize};
-use syn::LitByteStr;
+use syn::{LitByteStr, LitStr};
 
 const W3C_DOC_BASE: &str = "https://www.w3.org/TR/activitystreams-vocabulary";
 
@@ -13,7 +17,7 @@ fn doc_link(name: &str) -> String {
     format!("{W3C_DOC_BASE}/#dfn-{}", name.to_lowercase())
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, PartialEq, Eq)]
 enum PropertyKind {
     Required,
     Functional,
@@ -30,14 +34,20 @@ enum ContainerType {
 struct ContainerDef {
     #[serde(rename = "type")]
     container_type: ContainerType,
-    name: String,
+    tag: String,
+    #[serde(default = "Default::default")]
+    // another names of property
+    aka: HashSet<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct PropertyDef {
     #[serde(rename = "type")]
     property_type: String,
-    rename: Option<String>,
+    tag: Option<String>,
+    // another names of property
+    #[serde(default = "Default::default")]
+    aka: HashSet<String>,
     uri: String,
     doc: String,
     container: Option<ContainerDef>,
@@ -57,6 +67,11 @@ enum PropertyType {
 impl PropertyDef {
     fn property_type(&self) -> anyhow::Result<PropertyType> {
         let ty: TokenStream = syn::parse_str(&self.property_type)?;
+        let ty = match self.kind {
+            PropertyKind::Functional => quote!(Option<#ty>),
+            PropertyKind::Normal => quote!(Property<#ty>),
+            PropertyKind::Required => ty,
+        };
         if let Some(container) = &self.container {
             match container.container_type {
                 ContainerType::Language => Ok(PropertyType::LanguageContainer {
@@ -66,26 +81,34 @@ impl PropertyDef {
                 }),
             }
         } else {
-            let ty = match self.kind {
-                PropertyKind::Functional => quote!(Option<#ty>),
-                PropertyKind::Normal => quote!(Property<#ty>),
-                PropertyKind::Required => ty,
-            };
             Ok(PropertyType::Simple(ty))
         }
     }
 
-    fn tag(&self, name: &str) -> String {
-        self.rename.clone().unwrap_or_else(|| name.to_owned())
+    fn tags(&self, name: &str) -> String {
+        self.tag.clone().unwrap_or_else(|| name.to_owned())
     }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+enum PreferredPropertyName {
+    Simple(String),
+    LangContainer { default: String, container: String },
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 struct TypeDef {
-    extends: Vec<String>,
+    #[serde(default = "Default::default")]
+    extends: HashSet<String>,
+    #[serde(default = "Default::default")]
     properties: HashMap<String, PropertyDef>,
+    subtype_name: String,
     #[serde(default = "Default::default")]
     as_object_id: bool,
+    #[serde(default = "Default::default")]
+    preferred_property_name: HashMap<String, PreferredPropertyName>,
+    #[serde(default = "Default::default")]
+    except_properties: HashSet<String>,
 }
 
 fn collect_properties(
@@ -122,16 +145,17 @@ fn generate_properties(properties: &[(String, PropertyDef)]) -> anyhow::Result<T
                 PropertyType::LanguageContainer { ty, .. } => ty,
                 PropertyType::Simple(ty) => ty,
             };
-            let tag = def.tag(name);
+            let tag = def.tags(name);
             let doc_comment = format!(
-                "`{}`\n\n[W3C recommendation]({})\n]n{}",
+                "`{}`\n\n[W3C recommendation]({})\n\n{}",
                 def.uri,
                 doc_link(&tag),
                 def.doc
             );
+            let doc_lit = LitStr::new(&doc_comment, Span::call_site());
             let quoted = quote! {
-                #[doc = #doc_comment]
-                #quoted_name: #quoted_type,
+                #[doc = #doc_lit]
+                pub #quoted_name: #quoted_type,
             };
             Ok::<_, anyhow::Error>(quoted)
         })
@@ -144,32 +168,47 @@ fn generate_properties(properties: &[(String, PropertyDef)]) -> anyhow::Result<T
 
 fn generate_serialize_impl(
     name: &str,
+    def: &TypeDef,
     properties: &[(String, PropertyDef)],
 ) -> anyhow::Result<TokenStream> {
     let name_ident = Ident::new(name, Span::call_site());
     let serializings = properties
         .iter()
-        .flat_map(|(name, def)| {
+        .map(|(name, property_def)| {
             let name_ident = Ident::new(name, Span::call_site());
-            let tag = def.tag(name);
-            if let Some(container) = &def.container {
+            let tag = property_def.tags(name);
+            if let Some(container) = &property_def.container {
                 match container.container_type {
                     ContainerType::Language => {
-                        let map_name = &container.name;
-                        quote! {
+                        let (tag, map_tag) = def.preferred_property_name.get(name).map(|prop| {
+                            let PreferredPropertyName::LangContainer { default, container } = prop else {
+                                bail!("container expected")
+                            };
+                            Ok((default, container))
+                        }).unwrap_or_else(|| Ok((name, &container.tag)))?;
+                        Ok(quote! {
                             if self.#name_ident.default.is_some() {
                                 serializer.serialize_entry(#tag, &self.#name_ident.default)?;
                             }
                             if !self.#name_ident.per_lang.is_empty() {
-                                serializer.serialize_entry(#map_name, &self.#name_ident.per_lang)?;
+                                serializer.serialize_entry(#map_tag, &self.#name_ident.per_lang)?;
                             }
-                        }
+                        })
                     }
                 }
             } else {
-                quote! { serializer.serialize_entry(#tag, &self.#name_ident)?; }
+                let tag = def.preferred_property_name.get(name).map(|prop| {
+                    let PreferredPropertyName::Simple(tag) = prop else {
+                        bail!("simple property expected")
+                    };
+                    Ok(tag)
+                }).unwrap_or_else(|| Ok(&tag))?;
+                Ok(quote! { serializer.serialize_entry(#tag, &self.#name_ident)?; })
             }
         })
+        .collect::<anyhow::Result<Vec<_>>>()?
+        .into_iter()
+        .flatten()
         .collect::<TokenStream>();
     Ok(quote! {
         #[allow(non_snake_case, unused_mut, unused_imports, dead_code, unused_attributes, clippy::match_single_binding)]
@@ -196,74 +235,104 @@ fn generate_deserialize_impl(
     properties: &[(String, PropertyDef)],
 ) -> anyhow::Result<TokenStream> {
     let name_ident = Ident::new(name, Span::call_site());
-
     let field_tags = properties
         .iter()
-        .map(|(name, def)| {
-            let tag = def.tag(name);
-            if let Some(container) = &def.container {
+        .map(|(name, prop_def)| {
+            let tag = prop_def.tags(name);
+            let aka = prop_def
+                .aka
+                .iter()
+                .map(|tag| quote!(#tag,))
+                .collect::<TokenStream>();
+            if let Some(container) = &prop_def.container {
+                let container_aka = container
+                    .aka
+                    .iter()
+                    .map(|tag| quote!(#tag, ))
+                    .collect::<TokenStream>();
                 match container.container_type {
                     ContainerType::Language => {
-                        let map_tag = &container.name;
-                        quote! {#tag, #map_tag, }
+                        let map_tag = &container.tag;
+                        Ok(quote! {#aka #container_aka #tag, #map_tag, })
                     }
                 }
             } else {
-                quote! {#tag, }
+                Ok(quote! {#aka #tag, })
             }
         })
+        .collect::<anyhow::Result<Vec<_>>>()?
+        .into_iter()
+        .flatten()
         .collect::<TokenStream>();
 
     let fields_enum_defs = properties
         .iter()
         .map(|(name, def)| {
             let ident = Ident::new(name, Span::call_site());
+            let aka = def
+                .aka
+                .iter()
+                .map(|name| quote!(#name, ))
+                .collect::<TokenStream>();
             if let Some(container) = &def.container {
                 match container.container_type {
                     ContainerType::Language => {
-                        let map_ident = Ident::new(
-                            &format!("_prop_map_{}", &container.name),
-                            Span::call_site(),
-                        );
-                        quote!(#ident, #map_ident,)
+                        let map_ident = Ident::new(&container.tag, Span::call_site());
+                        let container_aka = container
+                            .aka
+                            .iter()
+                            .map(|tag| quote!(#tag, ))
+                            .collect::<TokenStream>();
+                        quote!(#aka #container_aka #ident, #map_ident,)
                     }
                 }
             } else {
-                quote!(#ident,)
+                quote!(#aka #ident,)
             }
         })
         .collect::<TokenStream>();
 
     let field_enum_match_arms = |bytes: bool| {
         properties
-        .iter()
-        .map(|(name, def)| {
-            let tag = def.tag(name);
-            let tag = if bytes {
-                LitByteStr::new(tag.as_bytes(), Span::call_site()).into_token_stream()
-            } else {
-                tag.into_token_stream()
-            };
-            let name = Ident::new(name, Span::call_site());
-            if let Some(container) = &def.container {
-                let map_ident =
-                    Ident::new(&format!("_prop_map_{}", &container.name), Span::call_site());
-
-                let map_tag = if bytes {
-                    LitByteStr::new(container.name.as_bytes(), Span::call_site()).into_token_stream()
+            .iter()
+            .map(|(name, def)| {
+                let tag = def.tags(name);
+                let name = Ident::new(name, Span::call_site());
+                let arms = def
+                    .aka
+                    .iter()
+                    .chain(std::iter::once(&tag))
+                    .map(|tag| {
+                        let tag = if bytes {
+                            LitByteStr::new(tag.as_bytes(), Span::call_site()).into_token_stream()
+                        } else {
+                            tag.into_token_stream()
+                        };
+                        quote!(#tag => Ok(__Fields::#name),)
+                    })
+                    .collect::<TokenStream>();
+                if let Some(container) = &def.container {
+                    let map_ident = Ident::new(&container.tag, Span::call_site());
+                    let container_arms = container
+                        .aka
+                        .iter()
+                        .chain(std::iter::once(&container.tag))
+                        .map(|tag| {
+                            let tag = if bytes {
+                                LitByteStr::new(container.tag.as_bytes(), Span::call_site())
+                                    .into_token_stream()
+                            } else {
+                                quote!(#tag)
+                            };
+                            quote!(#tag => Ok(__Fields::#map_ident),)
+                        })
+                        .collect::<TokenStream>();
+                    quote!(#arms #container_arms)
                 } else {
-                    container.name.clone().into_token_stream()
-                };
-                match container.container_type {
-                    ContainerType::Language => {
-                        quote!(#tag => Ok(__Fields::#name), #map_tag => Ok(__Fields::#map_ident),)
-                    }
+                    arms
                 }
-            } else {
-                quote!(#tag => Ok(__Fields::#name),)
-            }
-        })
-        .collect::<TokenStream>()
+            })
+            .collect::<TokenStream>()
     };
 
     let field_enum_match_arms_str = field_enum_match_arms(false);
@@ -278,8 +347,7 @@ fn generate_deserialize_impl(
                     default, per_lang, ..
                 } => {
                     if let Some(container) = &def.container {
-                        let name_map =
-                            Ident::new(&format!("_prop_map_{}", container.name), Span::call_site());
+                        let name_map = Ident::new(&container.tag, Span::call_site());
                         quote! {
                             let mut #name = Option::<#default>::None;
                             let mut #name_map = Option::<#per_lang>::None;
@@ -301,36 +369,66 @@ fn generate_deserialize_impl(
             let name_ident = Ident::new(name, Span::call_site());
             if let Some(container) = &def.container {
                 let PropertyType::LanguageContainer { default, per_lang, .. } = def.property_type()? else {
-                    unreachable!()
+                    bail!("language container expected")
                 };
-                let map_name = format!("_prop_map_{}", container.name);
-                let map_name_ident = Ident::new(&map_name, Span::call_site());
-                Ok(quote!{
-                    __Fields::#name_ident => {
-                        if #name_ident.is_some() {
-                            return Err(<A::Error as serde::de::Error>::duplicate_field(#name));
+                let map_name = &container.tag;
+                let map_name_ident = Ident::new(map_name, Span::call_site());
+                if PropertyKind::Normal == def.kind {
+                    Ok(quote!{
+                        __Fields::#name_ident => {
+                            if let Some(occupied) = #name_ident.as_mut() {
+                                occupied.merge(__map.next_value::<#default>()?);
+                            }
+                            #name_ident = Some(__map.next_value::<#default>()?);
                         }
-                        #name_ident = Some(__map.next_value::<#default>()?);
-                    }
-                    __Fields::#map_name_ident => {
-                        if #map_name_ident.is_some() {
-                            return Err(<A::Error as serde::de::Error>::duplicate_field(#map_name));
+                        __Fields::#map_name_ident => {
+                            if let Some(occupied) = #map_name_ident.as_mut() {
+                                occupied.merge(__map.next_value::<#per_lang>()?);
+                            }
+                            #map_name_ident = Some(__map.next_value::<#per_lang>()?);
                         }
-                        #map_name_ident = Some(__map.next_value::<#per_lang>()?);
-                    }
-                })
+                    })
+                }
+                else {
+                    Ok(quote!{
+                        __Fields::#name_ident => {
+                            if #name_ident.is_some() {
+                                return Err(<A::Error as serde::de::Error>::duplicate_field(#name));
+                            }
+                            #name_ident = Some(__map.next_value::<#default>()?);
+                        }
+                        __Fields::#map_name_ident => {
+                            if #map_name_ident.is_some() {
+                                return Err(<A::Error as serde::de::Error>::duplicate_field(#map_name));
+                            }
+                            #map_name_ident = Some(__map.next_value::<#per_lang>()?);
+                        }
+                    })
+                }
             } else {
                 let PropertyType::Simple(ty) = def.property_type()? else {
-                    unreachable!()
+                    bail!("simple type expected")
                 };
-                Ok(quote!(
-                    __Fields::#name_ident => {
-                        if #name_ident.is_some() {
-                            return Err(<A::Error as serde::de::Error>::duplicate_field(#name));
+                if PropertyKind::Normal == def.kind {
+                    Ok(quote!(
+                        __Fields::#name_ident => {
+                            if let Some(occupied) = #name_ident.as_mut() {
+                                occupied.merge(__map.next_value::<#ty>()?);
+                            }
+                            #name_ident = Some(__map.next_value::<#ty>()?);
                         }
-                        #name_ident = Some(__map.next_value::<#ty>()?);
-                    }
-                ))
+                    ))
+                }
+                else {
+                    Ok(quote!(
+                        __Fields::#name_ident => {
+                            if #name_ident.is_some() {
+                                return Err(<A::Error as serde::de::Error>::duplicate_field(#name));
+                            }
+                            #name_ident = Some(__map.next_value::<#ty>()?);
+                        }
+                    ))
+                }
             }
         })
         .collect::<anyhow::Result<Vec<_>>>()?
@@ -344,8 +442,7 @@ fn generate_deserialize_impl(
             let name_ident = Ident::new(name, Span::call_site());
             let not_found_msg = format!("{} not found", name);
             if let Some(container) = &def.container {
-                let map_name = format!("_prop_map_{}", container.name);
-                let map_name_ident = Ident::new(&map_name, Span::call_site());
+                let map_name_ident = Ident::new(&container.tag, Span::call_site());
                 Ok(quote! {
                     #name_ident: LangContainer {
                         default: #name_ident.ok_or_else(|| <A::Error as serde::de::Error>::missing_field(#not_found_msg))?,
@@ -453,19 +550,136 @@ fn generate_deserialize_impl(
     })
 }
 
+fn collect_subtypes(
+    name: &str,
+    defs: &HashMap<String, TypeDef>,
+) -> anyhow::Result<HashMap<String, TypeDef>> {
+    let mut subtypes = HashMap::new();
+    let mut queue = vec![name];
+    while let Some(name) = queue.pop() {
+        let def = defs
+            .get(name)
+            .with_context(|| format!("{name} not found"))?;
+        subtypes.insert(name.to_owned(), def.clone());
+        for (subtype_name, subtype_def) in defs {
+            if !subtypes.contains_key(subtype_name) && subtype_def.extends.contains(name) {
+                queue.push(&subtype_name);
+            }
+        }
+    }
+    Ok(subtypes)
+}
+
+fn generate_subtypes(name: &str, defs: &HashMap<String, TypeDef>) -> anyhow::Result<TokenStream> {
+    let def = defs
+        .get(name)
+        .with_context(|| format!("{name} not found"))?;
+    let subtypes = collect_subtypes(name, defs)?;
+    let name_ident = Ident::new(name, Span::call_site());
+
+    let subtype_arms = subtypes
+        .iter()
+        .map(|(name, _)| {
+            let subtype_ident = Ident::new(&name, Span::call_site());
+            quote! {
+                #subtype_ident(#subtype_ident),
+            }
+        })
+        .collect::<TokenStream>();
+    let subtype_ident = Ident::new(&def.subtype_name, Span::call_site());
+
+    let subtypes_upcast_arms = subtypes
+        .iter()
+        .map(|(name, _)| {
+            let ident = Ident::new(name, Span::call_site());
+            quote! { #subtype_ident::#ident(x) => x.into(), }
+        })
+        .collect::<TokenStream>();
+
+    let subtype_upcasts = subtypes
+        .iter()
+        .filter(|(subtype_name, _)| name != *subtype_name)
+        .map(|(subtype_name, def)| {
+            let super_properties = collect_properties(name, defs)?;
+            let sub_properties = collect_properties(&subtype_name, defs)?;
+            let sub_ident = Ident::new(subtype_name, Span::call_site());
+            let common_property_into = super_properties
+                .iter()
+                .filter(|(name, _)| sub_properties.iter().any(|(sub_name, _)| sub_name == name))
+                .map(|(name, _)| {
+                    let ident = Ident::new(name, Span::call_site());
+                    quote! {
+                        #ident: value.#ident.into(),
+                    }
+                })
+                .collect::<TokenStream>();
+            let fill_properties = sub_properties
+                .iter()
+                .filter(|(name, _)| !sub_properties.iter().any(|(sub_name, _)| sub_name == name))
+                .map(|(name, _)| {
+                    let ident = Ident::new(name, Span::call_site());
+                    quote! {
+                        #ident: Default::default(),
+                    }
+                })
+                .collect::<TokenStream>();
+            let sub_subtypes_ident = Ident::new(&def.subtype_name, Span::call_site());
+            Ok(quote! {
+                impl From<#sub_subtypes_ident> for #name_ident {
+                    fn from(value: #sub_subtypes_ident) -> Self {
+                        Into::<#sub_ident>::into(value).into()
+                    }
+                }
+
+                impl From<#sub_ident> for #name_ident {
+                    fn from(value: #sub_ident) -> Self {
+                        Self {
+                            #common_property_into
+                            #fill_properties
+                        }
+                    }
+                }
+            })
+        })
+        .collect::<anyhow::Result<Vec<_>>>()?
+        .into_iter()
+        .flatten()
+        .collect::<TokenStream>();
+
+    Ok(quote! {
+        #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, PartialEq)]
+        pub enum #subtype_ident {
+            #subtype_arms
+        }
+
+        impl From<#subtype_ident> for #name_ident {
+            fn from(value: #subtype_ident) -> Self {
+                match value {
+                    #subtypes_upcast_arms
+                }
+            }
+        }
+
+        #subtype_upcasts
+    })
+}
+
 fn generate_types(defs: HashMap<String, TypeDef>) -> anyhow::Result<TokenStream> {
     let mut token = TokenStream::new();
-    for name in defs.keys() {
+    for (name, def) in &defs {
         let properties = collect_properties(name, &defs)?;
         let quote_properties = generate_properties(&properties)?;
         let quote_name = Ident::new(name, Span::call_site());
+        let quote_subtype = generate_subtypes(name, &defs)?;
         token.append_all(quote! {
+            #[derive(Debug, Clone, PartialEq)]
             pub struct #quote_name {
                 #quote_properties
             }
         });
-        token.append_all(generate_serialize_impl(name, &properties)?);
+        token.append_all(generate_serialize_impl(name, def, &properties)?);
         token.append_all(generate_deserialize_impl(name, &properties)?);
+        token.append_all(quote_subtype);
     }
     Ok(token)
 }

@@ -1,9 +1,10 @@
 Object:
   extends: []
+  subtype_name: ObjectSubtypes
   properties:
     object_type:
-      type: Option<url::Url>
-      rename: type
+      type: Option<String>
+      tag: type
       uri: "@type"
       doc: Kind of [Object]
       kind: !Required
@@ -18,14 +19,12 @@ Object:
       type: Or<Remotable<Object>, Link>
       uri: https://www.w3.org/ns/activitystreams#attributedTo
       doc: |
-        [W3C recommendation](https://www.w3.org/TR/activitystreams-vocabulary/#dfn-attachment)
-        uri: `https://www.w3.org/ns/activitystreams#attributedTo`
         Identifies a resource attached or related to an object that potentially requires special handling.
         The intent is to provide a model that is at least semantically similar to attachments in email.
 
     attributed_to:
       type: Or<Remotable<Object>, Link>
-      rename: attributedTo
+      tag: attributedTo
       uri: https://www.w3.org/ns/activitystreams#attributedTo
       doc: |
         Identifies one or more entities to which this object is attributed.
@@ -43,7 +42,7 @@ Object:
       uri: https://www.w3.org/ns/activitystreams#content
       container:
         type: !Language
-        name: contentMap
+        tag: contentMap
       doc: |
         The content or textual representation of the Object encoded as a JSON string.
         By default, the value of content is HTML.
@@ -52,8 +51,10 @@ Object:
         The content may be expressed using multiple language-tagged values.
 Link:
   extends: []
+  subtype_name: LinkSubtypes
   as_object_id: false
   properties: {}
 Activity:
   extends: [Object]
+  subtype_name: ActivitySubtypes
   properties: {}

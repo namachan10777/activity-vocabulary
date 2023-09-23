@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, hash::Hash};
 
 use serde::{Deserialize, Serialize};
 
@@ -134,7 +134,37 @@ impl<T> SkipSerialization for Property<T> {
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct LangContainer<T> {
     pub default: Option<T>,
     pub per_lang: HashMap<String, T>,
+}
+
+pub trait MergeableProperty {
+    fn merge(&mut self, other: Self);
+}
+
+impl<T> MergeableProperty for Property<T> {
+    fn merge(&mut self, other: Self) {
+        self.0.extend(other.0.into_iter())
+    }
+}
+
+impl<K: Eq + Hash, V> MergeableProperty for HashMap<K, V> {
+    fn merge(&mut self, other: Self) {
+        self.extend(other.into_iter())
+    }
+}
+
+impl<T: MergeableProperty> MergeableProperty for Option<T> {
+    fn merge(&mut self, other: Self) {
+        match (self.as_mut(), other) {
+            (Some(x), Some(y)) => x.merge(y),
+            (None, Some(y)) => {
+                *self = Some(y);
+            }
+            (Some(_), None) => (),
+            (None, None) => (),
+        }
+    }
 }

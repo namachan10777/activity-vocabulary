@@ -1,5 +1,5 @@
 Object:
-  uri: https://www.w3.org/ns/activitystreams#Object	
+  uri: https://www.w3.org/ns/activitystreams#Object
   extends: []
   subtype_name: ObjectSubtypes
   doc: |
@@ -78,7 +78,7 @@ Object:
     end_time:
       type: xsd::DateTime
       tag: endTime
-      uri: https://www.w3.org/ns/activitystreams#endTime	
+      uri: https://www.w3.org/ns/activitystreams#endTime
       kind: !Functional
       doc: |
         The date and time describing the actual or expected ending time of the object.
@@ -93,13 +93,13 @@ Object:
 
     published:
       type: xsd::DateTime
-      uri: https://www.w3.org/ns/activitystreams#published	
+      uri: https://www.w3.org/ns/activitystreams#published
       kind: !Functional
       doc: The date and time at which the object was published
 
     icon:
       type: Or<Remotable<ImageSubtypes>, LinkSubtypes>
-      uri: https://www.w3.org/ns/activitystreams#icon	
+      uri: https://www.w3.org/ns/activitystreams#icon
       doc: |
         Indicates an entity that describes an icon for this object.
         The image should have an aspect ratio of one (horizontal) to one (vertical) and
@@ -107,39 +107,32 @@ Object:
 
     image:
       type: Or<Remotable<ImageSubtypes>, LinkSubtypes>
-      uri: https://www.w3.org/ns/activitystreams#image	
+      uri: https://www.w3.org/ns/activitystreams#image
       doc: |
         Indicates an entity that describes an image for this object.
         Unlike the icon property, there are no aspect ratio or display size limitations assumed.
 
     in_reply_to:
       type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
-      uri: https://www.w3.org/ns/activitystreams#inReplyTo	
+      uri: https://www.w3.org/ns/activitystreams#inReplyTo
       doc: |
         Indicates one or more entities for which this object is considered a response.
 
     location:
       type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
-      uri: https://www.w3.org/ns/activitystreams#location	
+      uri: https://www.w3.org/ns/activitystreams#location
       doc: |
         Indicates one or more physical or logical locations associated with the object.
 
     preview:
       type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
-      uri: https://www.w3.org/ns/activitystreams#preview	
+      uri: https://www.w3.org/ns/activitystreams#preview
       doc: |
         Identifies an entity that provides a preview of this object.
 
-    published:
-      type: xsd::DateTime 
-      uri: https://www.w3.org/ns/activitystreams#published	
-      doc: |
-        The date and time at which the object was published
-      kind: !Functional
-
     replies:
       type: Remotable<CollectionSubtypes>
-      uri: https://www.w3.org/ns/activitystreams#replies	
+      uri: https://www.w3.org/ns/activitystreams#replies
       doc: |
         Identifies a [CollectionSubtypes] containing objects considered to be responses to this object.
       functional: true
@@ -147,7 +140,7 @@ Object:
     start_time:
       type: xsd::DateTime
       tag: startTime
-      uri: https://www.w3.org/ns/activitystreams#startTime	
+      uri: https://www.w3.org/ns/activitystreams#startTime
       kind: !Functional
       doc: |
         The date and time describing the actual or expected starting time of the object.
@@ -156,17 +149,17 @@ Object:
 
     summary:
       type: String
-      uri: https://www.w3.org/ns/activitystreams#summary	
+      uri: https://www.w3.org/ns/activitystreams#summary
       container:
         type: !Language
         tag: summaryMap
       doc: |
-         A natural language summarization of the object encoded as HTML.
-         Multiple language tagged summaries **may** be provided.
+        A natural language summarization of the object encoded as HTML.
+        Multiple language tagged summaries **may** be provided.
 
     tag:
       type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
-      uri: https://www.w3.org/ns/activitystreams#tag	
+      uri: https://www.w3.org/ns/activitystreams#tag
       doc: |
         One or more "tags" that have been associated with an objects.
         A tag can be any kind of Object.
@@ -175,45 +168,45 @@ Object:
 
     updated:
       type: xsd::DateTime
-      uri: https://www.w3.org/ns/activitystreams#updated	
+      uri: https://www.w3.org/ns/activitystreams#updated
       kind: !Functional
       doc: |
         The date and time at which the object was updated
-    
+
     url:
       type: Or<url::Url, LinkSubtypes>
-      uri: https://www.w3.org/ns/activitystreams#url	
+      uri: https://www.w3.org/ns/activitystreams#url
       kind: !Functional
       doc: |
         Identifies one or more links to representations of the object
 
     to:
       type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
-      uri: https://www.w3.org/ns/activitystreams#to	
+      uri: https://www.w3.org/ns/activitystreams#to
       doc: |
         Identifies an entity considered to be part of the public primary audience of an Object
 
     bto:
       type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
-      uri: https://www.w3.org/ns/activitystreams#bto	
+      uri: https://www.w3.org/ns/activitystreams#bto
       doc: |
         Identifies an Object that is part of the private primary audience of this Object.
 
     cc:
       type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
-      uri: https://www.w3.org/ns/activitystreams#cc	
+      uri: https://www.w3.org/ns/activitystreams#cc
       doc: |
         Identifies an Object that is part of the public secondary audience of this Object.
 
     bcc:
       type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
-      uri: https://www.w3.org/ns/activitystreams#bcc	
+      uri: https://www.w3.org/ns/activitystreams#bcc
       doc: |
         Identifies one or more Objects that are part of the private secondary audience of this Object.
 
     media_type:
       type: String
-      uri: https://www.w3.org/ns/activitystreams#mediaType	
+      uri: https://www.w3.org/ns/activitystreams#mediaType
       kind: !Functional
       doc: |
         Identifies the MIME media type of the value of the [Object::content] property.
@@ -222,7 +215,7 @@ Object:
     duration:
       type: xsd::Duration
       kind: !Functional
-      uri: https://www.w3.org/ns/activitystreams#duration	
+      uri: https://www.w3.org/ns/activitystreams#duration
       doc: |
         When the object describes a time-bound resource,
         such as an audio or video,
@@ -231,7 +224,7 @@ Object:
         section 3.3.6 (e.g. a period of 5 seconds is represented as `PT5S`).
 Link:
   extends: []
-  uri: https://www.w3.org/ns/activitystreams#Link	
+  uri: https://www.w3.org/ns/activitystreams#Link
   subtype_name: LinkSubtypes
   as_object_id: false
   doc: |
@@ -252,14 +245,14 @@ Link:
 
     href:
       type: url::Url
-      uri: https://www.w3.org/ns/activitystreams#href	
+      uri: https://www.w3.org/ns/activitystreams#href
       kind: !Required
       doc: |
         The target resource pointed to by a [Link].
 
     rel:
       type: String
-      uri: https://www.w3.org/ns/activitystreams#rel	
+      uri: https://www.w3.org/ns/activitystreams#rel
       doc: |
         A link relation associated with a [Link].
         The value must conform to both the [HTML5](https://datatracker.ietf.org/doc/html/rfc2119)
@@ -267,7 +260,7 @@ Link:
 
     media_type:
       type: String
-      uri: https://www.w3.org/ns/activitystreams#mediaType	
+      uri: https://www.w3.org/ns/activitystreams#mediaType
       kind: !Functional
       doc: |
         Identifies the MIME media type of the referenced resource.
@@ -284,7 +277,7 @@ Link:
 
     hreflang:
       type: String
-      uri: https://www.w3.org/ns/activitystreams#hreflang	
+      uri: https://www.w3.org/ns/activitystreams#hreflang
       kind: !Functional
       doc: |
         Hints as to the language used by the target resource.
@@ -292,29 +285,27 @@ Link:
 
     height:
       type: u64
-      uri: https://www.w3.org/ns/activitystreams#height	
+      uri: https://www.w3.org/ns/activitystreams#height
       kind: !Functional
       doc: |
         On a [Link], specifies a hint as to the rendering height in device-independent pixels of the linked resource.
 
     width:
       type: u64
-      uri: https://www.w3.org/ns/activitystreams#width	
+      uri: https://www.w3.org/ns/activitystreams#width
       kind: !Functional
       doc: |
         On a [Link], specifies a hint as to the rendering width in device-independent pixels of the linked resource.
 
     preview:
       type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
-      uri: https://www.w3.org/ns/activitystreams#preview	
+      uri: https://www.w3.org/ns/activitystreams#preview
       doc: |
         Identifies an entity that provides a preview of this object.
 
-
-
 Activity:
   extends: [Object]
-  uri: https://www.w3.org/ns/activitystreams#Activity	
+  uri: https://www.w3.org/ns/activitystreams#Activity
   subtype_name: ActivitySubtypes
   doc: |
     An Activity is a subtype of [Object] that describes some form of action that may happen,
@@ -335,7 +326,7 @@ Activity:
       doc: |
         Describes the direct object of the activity.
         For instance, in the activity `John added a movie to his wishlist`, the object of the activity is the movie added.
-    
+
     target:
       type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
       uri: https://www.w3.org/ns/activitystreams#target
@@ -363,12 +354,12 @@ Activity:
 
     instrument:
       type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
-      uri: https://www.w3.org/ns/activitystreams#instrument	
+      uri: https://www.w3.org/ns/activitystreams#instrument
       doc: |
         Identifies one or more objects used (or to be used) in the completion of an [Activity].
 
 IntransitiveActivity:
-  uri: https://www.w3.org/ns/activitystreams#IntransitiveActivity	
+  uri: https://www.w3.org/ns/activitystreams#IntransitiveActivity
   extends: [Activity]
   subtype_name: IntransitiveActivitySubtypes
   except_properties: [object]
@@ -377,7 +368,7 @@ IntransitiveActivity:
     The object property is therefore inappropriate for these activities.
 
 Collection:
-  uri: https://www.w3.org/ns/activitystreams#Collection	
+  uri: https://www.w3.org/ns/activitystreams#Collection
   subtype_name: CollectionSubtypes
   extends: [Object]
   doc: |
@@ -388,7 +379,7 @@ Collection:
   properties:
     total_items:
       type: usize
-      uri: https://www.w3.org/ns/activitystreams#totalItems	
+      uri: https://www.w3.org/ns/activitystreams#totalItems
       tag: totalItems
       doc: |
         A non-negative integer specifying the total number of objects contained by the logical view of the collection.
@@ -397,14 +388,14 @@ Collection:
 
     current:
       type: Box<Or<Remotable<CollectionPageSubtypes>, LinkSubtypes>>
-      uri: https://www.w3.org/ns/activitystreams#current	
+      uri: https://www.w3.org/ns/activitystreams#current
       kind: !Functional
       doc: |
         In a paged [Collection], indicates the page that contains the most recently updated member items.
 
     first:
       type: Box<Or<Remotable<CollectionPageSubtypes>, LinkSubtypes>>
-      uri: https://www.w3.org/ns/activitystreams#first	
+      uri: https://www.w3.org/ns/activitystreams#first
       kind: !Functional
       doc: |
         In a paged [Collection], indicates the furthest preceeding page of items in the collection.
@@ -417,7 +408,7 @@ Collection:
         In a paged [Collection], indicates the furthest proceeding page of the collection.
 
 OrderedCollection:
-  uri: https://www.w3.org/ns/activitystreams#OrderedCollection	
+  uri: https://www.w3.org/ns/activitystreams#OrderedCollection
   subtype_name: OrderedCollectionSubtypes
   extends: [Collection]
   doc: |
@@ -426,7 +417,7 @@ OrderedCollection:
     items: !Simple
       - "orderedItems"
 CollectionPage:
-  uri: https://www.w3.org/ns/activitystreams#CollectionPage	
+  uri: https://www.w3.org/ns/activitystreams#CollectionPage
   subtype_name: CollectionPageSubtypes
   extends: [Collection]
   doc: |
@@ -456,7 +447,7 @@ CollectionPage:
         In a paged [CollectionSubtypes], indicates the prev page of items.
 
 OrderedCollectionPage:
-  uri: https://www.w3.org/ns/activitystreams#OrderedCollectionPage	
+  uri: https://www.w3.org/ns/activitystreams#OrderedCollectionPage
   subtype_name: OrderedCollectionPageSubtypes
   extends: [OrderedCollection, CollectionPage]
   doc: |
@@ -465,7 +456,7 @@ OrderedCollectionPage:
     for a complete description of the [OrderedCollectionPage] object.
   properties:
     start_index:
-      uri: https://www.w3.org/ns/activitystreams#startIndex	
+      uri: https://www.w3.org/ns/activitystreams#startIndex
       type: usize
       tag: startIndex
       kind: !Functional
@@ -475,7 +466,7 @@ OrderedCollectionPage:
     items: !Simple
       - "orderedItems"
 Accept:
-  uri: https://www.w3.org/ns/activitystreams#Accept	
+  uri: https://www.w3.org/ns/activitystreams#Accept
   subtype_name: AcceptSubtypes
   extends: [Activity]
   doc: |
@@ -483,14 +474,14 @@ Accept:
     The [Accept::target] property can be used in certain circumstances to indicate the context into which the [Accept::object] has been accepted.
 
 TentativeAccept:
-  uri: https://www.w3.org/ns/activitystreams#TentativeAccept	
+  uri: https://www.w3.org/ns/activitystreams#TentativeAccept
   subtype_name: TentativeAcceptSubtypes
   extends: [Accept]
   doc: |
     A specialization of [Accept] indicating that the acceptance is tentative.
 
 Add:
-  uri: https://www.w3.org/ns/activitystreams#Add	
+  uri: https://www.w3.org/ns/activitystreams#Add
   subtype_name: AddSubtypes
   extends: [Activity]
   doc: |
@@ -500,7 +491,7 @@ Add:
     The [Add::origin] can be used to identify the context from which the [Add::origin] originated.
 
 Arrive:
-  uri: https://www.w3.org/ns/activitystreams#Arrive	
+  uri: https://www.w3.org/ns/activitystreams#Arrive
   subtype_name: ArriveSubtypes
   extends: [IntransitiveActivity]
   doc: |
@@ -509,14 +500,14 @@ Arrive:
     The [Arrive::target] typically has no defined meaning.
 
 Create:
-  uri: https://www.w3.org/ns/activitystreams#Create	
+  uri: https://www.w3.org/ns/activitystreams#Create
   subtype_name: CreateSubtypes
   extends: [Activity]
   doc: |
     Indicates that the [Create::actor] has created the [Create::object].
 
 Delete:
-  uri: https://www.w3.org/ns/activitystreams#Delete	
+  uri: https://www.w3.org/ns/activitystreams#Delete
   subtype_name: DeleteSubtypes
   extends: [Activity]
   doc: |
@@ -524,7 +515,7 @@ Delete:
     If specified, the [Delete::origin] indicates the context from which the [Delete::object] was deleted.
 
 Follow:
-  uri: https://www.w3.org/ns/activitystreams#Follow	
+  uri: https://www.w3.org/ns/activitystreams#Follow
   subtype_name: FollowSubtypes
   extends: [Activity]
   doc: |
@@ -534,7 +525,7 @@ Follow:
     The [Follow::target] and [Follow::origin] typically have no defined meaning.
 
 Ignore:
-  uri: https://www.w3.org/ns/activitystreams#Ignore	
+  uri: https://www.w3.org/ns/activitystreams#Ignore
   subtype_name: IgnoreSubtypes
   extends: [Activity]
   doc: |
@@ -542,7 +533,7 @@ Ignore:
     The [Ignore::target] and [Ignore::origin] typically have no defined meaning.
 
 Join:
-  uri: https://www.w3.org/ns/activitystreams#Join	
+  uri: https://www.w3.org/ns/activitystreams#Join
   subtype_name: JoinSubtypes
   extends: [Activity]
   doc: |
@@ -550,7 +541,7 @@ Join:
     The [Join::target] and [Join::origin] typically have no defined meaning.
 
 Leave:
-  uri: https://www.w3.org/ns/activitystreams#Leave	
+  uri: https://www.w3.org/ns/activitystreams#Leave
   subtype_name: LeaveSubtypes
   extends: [Activity]
   doc: |
@@ -558,7 +549,7 @@ Leave:
     The [Leave::target] and [Leave::origin] typically have no meaning.
 
 Like:
-  uri: https://www.w3.org/ns/activitystreams#Like	
+  uri: https://www.w3.org/ns/activitystreams#Like
   subtype_name: LikeSubtypes
   extends: [Activity]
   doc: |
@@ -574,14 +565,14 @@ Offer:
     The [Offer::target] and [Offer::origin] typically have no defined meaning.
 
 Invite:
-  uri: https://www.w3.org/ns/activitystreams#Invite	
+  uri: https://www.w3.org/ns/activitystreams#Invite
   subtype_name: InviteSubtypes
   extends: [Offer]
   doc: |
     A specialization of [Offer] in which the [Invite::actor] is extending an invitation for the [Invite::object] to the target.
 
 Reject:
-  uri: https://www.w3.org/ns/activitystreams#Reject	
+  uri: https://www.w3.org/ns/activitystreams#Reject
   subtype_name: RejectSubtypes
   extends: [Activity]
   doc: |
@@ -589,14 +580,14 @@ Reject:
     The target and [Reject::origin] typically have no defined meaning.
 
 TentativeReject:
-  uri: https://www.w3.org/ns/activitystreams#TentativeReject	
+  uri: https://www.w3.org/ns/activitystreams#TentativeReject
   subtype_name: TentativeRejectSubtypes
   extends: [Reject]
   doc: |
     A specialization of [Reject] in which the rejection is considered tentative.
 
 Remove:
-  uri: https://www.w3.org/ns/activitystreams#Remove	
+  uri: https://www.w3.org/ns/activitystreams#Remove
   subtype_name: RemoveSubtypes
   extends: [Activity]
   doc: |
@@ -604,7 +595,7 @@ Remove:
     If specified, the [Remove::origin] indicates the context from which the [Remove::object] is being removed.
 
 Undo:
-  uri: https://www.w3.org/ns/activitystreams#Undo	
+  uri: https://www.w3.org/ns/activitystreams#Undo
   subtype_name: UndoSubtypes
   extends: [Activity]
   doc: |
@@ -615,7 +606,7 @@ Undo:
     The [Undo::target] and [Undo::origin] typically have no defined meaning.
 
 Update:
-  uri: https://www.w3.org/ns/activitystreams#Update	
+  uri: https://www.w3.org/ns/activitystreams#Update
   subtype_name: UpdateSubtypes
   extends: [Activity]
   doc: |
@@ -623,28 +614,28 @@ Update:
     Note, however, that this vocabulary does not define a mechanism for describing the actual set of modifications made to [Update::object].
 
 View:
-  uri: https://www.w3.org/ns/activitystreams#View	
+  uri: https://www.w3.org/ns/activitystreams#View
   subtype_name: ViewSubtypes
   extends: [Activity]
   doc: |
     Indicates that the [View::actor] has viewed the [View::object].
 
 Listen:
-  uri: https://www.w3.org/ns/activitystreams#Listen	
+  uri: https://www.w3.org/ns/activitystreams#Listen
   subtype_name: ListenSubtypes
   extends: [Activity]
   doc: |
     Indicates that the [Listen::actor] has listened to the [Listen::object].
 
 Read:
-  uri: https://www.w3.org/ns/activitystreams#Read	
+  uri: https://www.w3.org/ns/activitystreams#Read
   subtype_name: ReadSubtypes
   extends: [Activity]
   doc: |
     Indicates that the [Read::actor] has read the [Read::object].
 
 Move:
-  uri: https://www.w3.org/ns/activitystreams#Move	
+  uri: https://www.w3.org/ns/activitystreams#Move
   subtype_name: MoveSubtypes
   extends: [Activity]
   doc: |
@@ -653,7 +644,7 @@ Move:
     either can be determined by context.
 
 Travel:
-  uri: https://www.w3.org/ns/activitystreams#Travel	
+  uri: https://www.w3.org/ns/activitystreams#Travel
   subtype_name: TravelSubtypes
   extends: [Activity]
   doc: |
@@ -662,14 +653,14 @@ Travel:
     If the [Travel::target] or [Travel::origin] are not specified, either can be determined by context.
 
 Announce:
-  uri: https://www.w3.org/ns/activitystreams#Announce	
+  uri: https://www.w3.org/ns/activitystreams#Announce
   subtype_name: AnnounceSubtypes
   extends: [Activity]
   doc: |
     Indicates that the [Announce::actor] is calling the [Announce::target]'s attention the [Announce::object].
     The [Announce::origin] typically has no defined meaning.
 Block:
-  uri: https://www.w3.org/ns/activitystreams#Block	
+  uri: https://www.w3.org/ns/activitystreams#Block
   subtype_name: BlockSubtypes
   extends: [Activity]
   doc: |
@@ -679,7 +670,7 @@ Block:
     The [Block::target] and [Block::origin] typically have no defined meaning.
 
 Flag:
-  uri: https://www.w3.org/ns/activitystreams#Flag	
+  uri: https://www.w3.org/ns/activitystreams#Flag
   subtype_name: FlagSubtypes
   extends: [Activity]
   doc: |
@@ -687,14 +678,14 @@ Flag:
     Flagging is defined in the sense common to many social platforms as reporting content as being inappropriate for any number of reasons.
 
 Dislike:
-  uri: https://www.w3.org/ns/activitystreams#Dislike	
+  uri: https://www.w3.org/ns/activitystreams#Dislike
   extends: [Activity]
   subtype_name: DislikeSubtypes
   doc: |
     Indicates that the [Dislike::actor] dislikes the [Dislike::object].
 
 Question:
-  uri: https://www.w3.org/ns/activitystreams#Question	
+  uri: https://www.w3.org/ns/activitystreams#Question
   subtype_name: QuestionSubtypes
   extends: [IntransitiveActivity]
   doc: |
@@ -724,43 +715,42 @@ Question:
         To indicate that a [Question] can have multiple answers, use [Question::one_of].
 
     closed:
-      uri: https://www.w3.org/ns/activitystreams#closed	
+      uri: https://www.w3.org/ns/activitystreams#closed
       type: Or<Or<Remotable<Object>, Link>, Or<xsd::DateTime, bool>>
-      doc:
-        Indicates that a question has been closed, and answers are no longer accepted.
+      doc: Indicates that a question has been closed, and answers are no longer accepted.
 
 Application:
-  uri: https://www.w3.org/ns/activitystreams#Application	
+  uri: https://www.w3.org/ns/activitystreams#Application
   subtype_name: ApplicationSubtypes
   extends: [Object]
   doc: Describes a software application.
 
 Group:
-  uri: https://www.w3.org/ns/activitystreams#Group	
+  uri: https://www.w3.org/ns/activitystreams#Group
   subtype_name: GroupSubtypes
   extends: [Object]
   doc: Represents a formal or informal collective of Actors.
 
 Organization:
-  uri: https://www.w3.org/ns/activitystreams#Organization	
+  uri: https://www.w3.org/ns/activitystreams#Organization
   subtype_name: OrganizationSubtypes
   extends: [Object]
   doc: Represents an organization.
 
 Person:
-  uri: https://www.w3.org/ns/activitystreams#Person	
+  uri: https://www.w3.org/ns/activitystreams#Person
   subtype_name: PersonSubtypes
   extends: [Object]
   doc: Represents an individual person.
 
 Service:
-  uri: https://www.w3.org/ns/activitystreams#Service	
+  uri: https://www.w3.org/ns/activitystreams#Service
   subtype_name: ServiceSubtypes
   extends: [Object]
   doc: Represents a service of any kind.
 
 Relationship:
-  uri: https://www.w3.org/ns/activitystreams#Relationship	
+  uri: https://www.w3.org/ns/activitystreams#Relationship
   subtype_name: RelationshipSubtypes
   extends: [Object]
   doc: |
@@ -771,7 +761,7 @@ Relationship:
 
   properties:
     subject:
-      uri: https://www.w3.org/ns/activitystreams#subject	
+      uri: https://www.w3.org/ns/activitystreams#subject
       type: Or<Remotable<Object>, Link>
       kind: !Functional
       doc: |
@@ -782,65 +772,65 @@ Relationship:
       type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
       uri: https://www.w3.org/ns/activitystreams#object
       doc: |
-        Describes the entity to which the [Relationship::subject] is related.     
-    
+        Describes the entity to which the [Relationship::subject] is related.
+
     relationship:
-      uri: https://www.w3.org/ns/activitystreams#relationship	
+      uri: https://www.w3.org/ns/activitystreams#relationship
       type: Remotable<Object>
       doc: |
         On a [Relationship] object,
         the [Relationship::relationship] property identifies the kind of relationship that exists between [Relationship::subject] and [Relationship::object].
 
 Article:
-  uri: https://www.w3.org/ns/activitystreams#Article	
+  uri: https://www.w3.org/ns/activitystreams#Article
   extends: [Object]
   subtype_name: ArticleSubtypes
   doc: Represents any kind of multi-paragraph written work.
- 
+
 Document:
-  uri: https://www.w3.org/ns/activitystreams#Document	
+  uri: https://www.w3.org/ns/activitystreams#Document
   extends: [Object]
   subtype_name: DocumentSubtypes
   doc: Represents a document of any kind.
- 
+
 Audio:
-  uri: https://www.w3.org/ns/activitystreams#Audio	
+  uri: https://www.w3.org/ns/activitystreams#Audio
   extends: [Document]
   subtype_name: AudioSubtypes
   doc: Represents an audio document of any kind.
 
 Image:
-  uri: https://www.w3.org/ns/activitystreams#Image	
+  uri: https://www.w3.org/ns/activitystreams#Image
   extends: [Document]
   subtype_name: ImageSubtypes
   doc: An image document of any kind
 
 Video:
-  uri: https://www.w3.org/ns/activitystreams#Video	
+  uri: https://www.w3.org/ns/activitystreams#Video
   extends: [Document]
   subtype_name: VideoSubtypes
   doc: Represents a video document of any kind.
 
 Note:
-  uri: https://www.w3.org/ns/activitystreams#Note	
+  uri: https://www.w3.org/ns/activitystreams#Note
   extends: [Document]
   subtype_name: NoteSubtypes
   doc: Represents a short written work typically less than a single paragraph in length.
 
 Page:
-  uri: https://www.w3.org/ns/activitystreams#Page	
+  uri: https://www.w3.org/ns/activitystreams#Page
   extends: [Document]
   subtype_name: PageSubtypes
   doc: Represents a Web Page.
 
 Event:
-  uri: https://www.w3.org/ns/activitystreams#Event	
+  uri: https://www.w3.org/ns/activitystreams#Event
   extends: [Object]
   subtype_name: EventSubtypes
   doc: Represents any kind of event.
 
 Place:
-  uri: https://www.w3.org/ns/activitystreams#Place	
+  uri: https://www.w3.org/ns/activitystreams#Place
   extends: [Object]
   subtype_name: PlaceSubtypes
   doc: Represents a logical or physical location. See 5.3 Representing Places for additional information.
@@ -848,31 +838,29 @@ Place:
     accuracy:
       type: f64
       kind: !Functional
-      uri: https://www.w3.org/ns/activitystreams#accuracy	
-      doc:
-        Indicates the accuracy of position coordinates on a [Place] objects.
+      uri: https://www.w3.org/ns/activitystreams#accuracy
+      doc: Indicates the accuracy of position coordinates on a [Place] objects.
         Expressed in properties of percentage. e.g. "94.0" means "94.0% accurate".
 
     altitude:
       type: f64
       kind: !Functional
-      uri: https://www.w3.org/ns/activitystreams#altitude	
+      uri: https://www.w3.org/ns/activitystreams#altitude
       doc: |
         Indicates the altitude of a place.
         The measurement [Place::units] is indicated using the units property.
         If [Place::units] is not specified, the default is assumed to be "m" indicating meters.
 
- 
     latitude:
       type: f64
       kind: !Functional
-      uri: https://www.w3.org/ns/activitystreams#latitude	
+      uri: https://www.w3.org/ns/activitystreams#latitude
       doc: The longitude of a place
 
     longitude:
       type: f64
       kind: !Functional
-      uri: https://www.w3.org/ns/activitystreams#longitude	
+      uri: https://www.w3.org/ns/activitystreams#longitude
       doc: The longitude of a place
 
     radius:
@@ -886,21 +874,21 @@ Place:
 
     units:
       type: Unit
-      uri: https://www.w3.org/ns/activitystreams#units	
+      uri: https://www.w3.org/ns/activitystreams#units
       kind: !Required
       doc: |
         Specifies the measurement units for the [Place::radius] and [Place::altitude] properties on a [Place] object.
         If not specified, the default is assumed to be "m" for "meters".
 
 Mention:
-  uri: https://www.w3.org/ns/activitystreams#Mention	
+  uri: https://www.w3.org/ns/activitystreams#Mention
   extends: [Link]
   subtype_name: MentionSubtypes
   doc: |
     A specialized [Link] that represents an @mention.
 
 Profile:
-  uri: https://www.w3.org/ns/activitystreams#Profile	
+  uri: https://www.w3.org/ns/activitystreams#Profile
   extends: [Object]
   subtype_name: ProfileSubtypes
   doc: |
@@ -909,14 +897,14 @@ Profile:
     The [Profile::describes] property is used to reference the object being described by the profile.
   properties:
     describes:
-      uri: https://www.w3.org/ns/activitystreams#describes	
+      uri: https://www.w3.org/ns/activitystreams#describes
       kind: !Functional
       type: Remotable<Object>
       doc: |
         On a [Profile] object, the [Profile::describes] property identifies the object described by the Profile.
 
 Tombstone:
-  uri: https://www.w3.org/ns/activitystreams#Tombstone	
+  uri: https://www.w3.org/ns/activitystreams#Tombstone
   extends: [Object]
   subtype_name: TombstoneSubtypes
   doc: |
@@ -924,20 +912,14 @@ Tombstone:
     It can be used in [Collection]s to signify that there used to be an object at this position, but it has been deleted.
   properties:
     former_type:
-      uri: https://www.w3.org/ns/activitystreams#formerType	
+      uri: https://www.w3.org/ns/activitystreams#formerType
       tag: formerType
       type: String
       doc: |
         On a [Tombstone] object, the [Tombstone::former_type] property identifies the type of the object that was deleted.
 
     deleted:
-      uri: https://www.w3.org/ns/activitystreams#deleted	
+      uri: https://www.w3.org/ns/activitystreams#deleted
       type: xsd::DateTime
       doc: |
         On a [Tombstone] object, the [Tombstone::deleted] property is a timestamp for when the object was deleted.
-
-
-
-
-
-

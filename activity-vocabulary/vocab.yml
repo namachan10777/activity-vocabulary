@@ -468,3 +468,279 @@ OrderedCollectionPage:
   preferreed_property_name:
     items: !Simple
       - "orderedItems"
+Accept:
+  uri: https://www.w3.org/ns/activitystreams#Accept	
+  subtype_name: AcceptSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Accept::actor] accepts the [Accept::object].
+    The [Accept::target] property can be used in certain circumstances to indicate the context into which the [Accept::object] has been accepted.
+
+TentativeAccept:
+  uri: https://www.w3.org/ns/activitystreams#TentativeAccept	
+  subtype_name: TentativeAcceptSubtypes
+  extends: [Accept]
+  doc: |
+    A specialization of [Accept] indicating that the acceptance is tentative.
+
+Add:
+  uri: https://www.w3.org/ns/activitystreams#Add	
+  subtype_name: AddSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Add::actor] has added the [Add::object] to the [Add::target].
+    If the [Add::target] property is not explicitly specified,
+    the [Add::target] would need to be determined implicitly by context.
+    The [Add::origin] can be used to identify the context from which the [Add::origin] originated.
+
+Arrive:
+  uri: https://www.w3.org/ns/activitystreams#Arrive	
+  subtype_name: ArriveSubtypes
+  extends: [IntransitiveActivity]
+  doc: |
+    An [IntransitiveActivity] that indicates that the [Arrive::actor] has arrived at the [Arrive::location].
+    The [Arrive::origin] can be used to identify the context from which the actor originated.
+    The [Arrive::target] typically has no defined meaning.
+
+Create:
+  uri: https://www.w3.org/ns/activitystreams#Create	
+  subtype_name: CreateSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Create::actor] has created the [Create::object].
+
+Delete:
+  uri: https://www.w3.org/ns/activitystreams#Delete	
+  subtype_name: DeleteSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Delete::actor] has deleted the [Delete::object].
+    If specified, the [Delete::origin] indicates the context from which the [Delete::object] was deleted.
+
+Follow:
+  uri: https://www.w3.org/ns/activitystreams#Follow	
+  subtype_name: FollowSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Follow::actor] is "following" the object.
+    Following is defined in the sense typically used
+    within Social systems in which the actor is interested in any activity performed by or on the [Follow::object].
+    The [Follow::target] and [Follow::origin] typically have no defined meaning.
+
+Ignore:
+  uri: https://www.w3.org/ns/activitystreams#Ignore	
+  subtype_name: IgnoreSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the actor is ignoring the [Ignore::object].
+    The [Ignore::target] and [Ignore::origin] typically have no defined meaning.
+
+Join:
+  uri: https://www.w3.org/ns/activitystreams#Join	
+  subtype_name: JoinSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the actor has joined the [Join::object].
+    The [Join::target] and [Join::origin] typically have no defined meaning.
+
+Leave:
+  uri: https://www.w3.org/ns/activitystreams#Leave	
+  subtype_name: LeaveSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Leave::actor] has left the [Leave::object].
+    The [Leave::target] and [Leave::origin] typically have no meaning.
+
+Like:
+  uri: https://www.w3.org/ns/activitystreams#Like	
+  subtype_name: LikeSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Like::actor] likes, recommends or endorses the [Like::object].
+    The [Like::target] and [Like::origin] typically have no defined meaning.
+
+Offer:
+  uri: https://www.w3.org/ns/activitystreams#Offer
+  subtype_name: OfferSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the actor likes, recommends or endorses the [Offer::object].
+    The [Offer::target] and [Offer::origin] typically have no defined meaning.
+
+Invite:
+  uri: https://www.w3.org/ns/activitystreams#Invite	
+  subtype_name: InviteSubtypes
+  extends: [Offer]
+  doc: |
+    A specialization of [Offer] in which the [Invite::actor] is extending an invitation for the [Invite::object] to the target.
+
+Reject:
+  uri: https://www.w3.org/ns/activitystreams#Reject	
+  subtype_name: RejectSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Reject::actor] is rejecting the [Reject::object].
+    The target and [Reject::origin] typically have no defined meaning.
+
+TentativeReject:
+  uri: https://www.w3.org/ns/activitystreams#TentativeReject	
+  subtype_name: TentativeRejectSubtypes
+  extends: [Reject]
+  doc: |
+    A specialization of [Reject] in which the rejection is considered tentative.
+
+Remove:
+  uri: https://www.w3.org/ns/activitystreams#Remove	
+  subtype_name: RemoveSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Remove::actor] is removing the [Remove::object].
+    If specified, the [Remove::origin] indicates the context from which the [Remove::object] is being removed.
+
+Undo:
+  uri: https://www.w3.org/ns/activitystreams#Undo	
+  subtype_name: UndoSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Undo::actor] is undoing the [Undo::object].
+    In most cases, the [Undo::object] will be an [Activity] describing some previously performed action
+    (for instance, a person may have previously "liked" an article but, for whatever reason, might choose to undo that like at some later point in time).
+
+    The [Undo::target] and [Undo::origin] typically have no defined meaning.
+
+Update:
+  uri: https://www.w3.org/ns/activitystreams#Update	
+  subtype_name: UpdateSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Update::actor] has updated the [Update::object].
+    Note, however, that this vocabulary does not define a mechanism for describing the actual set of modifications made to [Update::object].
+
+View:
+  uri: https://www.w3.org/ns/activitystreams#View	
+  subtype_name: ViewSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [View::actor] has viewed the [View::object].
+
+Listen:
+  uri: https://www.w3.org/ns/activitystreams#Listen	
+  subtype_name: ListenSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Listen::actor] has listened to the [Listen::object].
+
+Read:
+  uri: https://www.w3.org/ns/activitystreams#Read	
+  subtype_name: ReadSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Read::actor] has read the [Read::object].
+
+Move:
+  uri: https://www.w3.org/ns/activitystreams#Move	
+  subtype_name: MoveSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Move::actor] has moved [Move::object] from [Move::origin] to [Move::target].
+    If the [Move::origin] or [Move::target] are not specified,
+    either can be determined by context.
+
+Travel:
+  uri: https://www.w3.org/ns/activitystreams#Travel	
+  subtype_name: TravelSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Travel::actor] is traveling to [Travel::target] from [Travel::origin].
+    [Travel] is an IntransitiveObject whose actor specifies the direct [Travel::object].
+    If the [Travel::target] or [Travel::origin] are not specified, either can be determined by context.
+
+Announce:
+  uri: https://www.w3.org/ns/activitystreams#Announce	
+  subtype_name: AnnounceSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Announce::actor] is calling the [Announce::target]'s attention the [Announce::object].
+    The [Announce::origin] typically has no defined meaning.
+Block:
+  uri: https://www.w3.org/ns/activitystreams#Block	
+  subtype_name: BlockSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Block::actor] is blocking the [Block::object].
+    Blocking is a stronger form of [Ignore].
+    The typical use is to support social systems that allow one user to block activities or content of other users.
+    The [Block::target] and [Block::origin] typically have no defined meaning.
+
+Flag:
+  uri: https://www.w3.org/ns/activitystreams#Flag	
+  subtype_name: FlagSubtypes
+  extends: [Activity]
+  doc: |
+    Indicates that the [Flag::actor] is "flagging" the [Flag::object].
+    Flagging is defined in the sense common to many social platforms as reporting content as being inappropriate for any number of reasons.
+
+Dislike:
+  uri: https://www.w3.org/ns/activitystreams#Dislike	
+  subtype_name: DislikeSubtypes
+  doc: |
+    Indicates that the [Dislike::actor] dislikes the [Dislike::object].
+
+Question:
+  uri: https://www.w3.org/ns/activitystreams#Question	
+  subtype_name: QuestionSubtypes
+  extends: [IntransitiveActivity]
+  doc: |
+    Represents a question being asked.
+    [Question] objects are an extension of [IntransitiveActivity].
+    That is, the [Question] object is an [Activity],
+    but the direct object is the question itself and therefore it would not contain an [Question::object] property.
+    Either of the [Question::any_of] and [Question::one_of] properties may be used to express possible answers,
+    but a [Question] object must not have both properties.
+  properties:
+    one_of:
+      uri: https://www.w3.org/ns/activitystreams#oneOf
+      tag: oneOf
+      type: Or<Remotable<Object>, Link>
+      doc: |
+        Identifies an exclusive option for a [Question].
+        Use of [Question::one_of] implies that the [Question] can have only a single answer.
+        To indicate that a [Question] can have multiple answers, use [Question::any_of].
+
+    any_of:
+      uri: https://www.w3.org/ns/activitystreams#anyOf
+      type: Or<Remotable<Object>, Like>
+      tag: anyOf
+      doc: |
+        Identifies an exclusive option for a [Question].
+        Use of [Question::one_of] implies that the [Question] can have only a single answer.
+        To indicate that a [Question] can have multiple answers, use [Question::one_of].
+
+    closed:
+      uri: https://www.w3.org/ns/activitystreams#closed	
+      type: Or<Or<Remotable<Object>, Link>, Or<xsd::DateTime, bool>>
+      doc:
+        Indicates that a question has been closed, and answers are no longer accepted.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

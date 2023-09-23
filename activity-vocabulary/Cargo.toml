@@ -10,5 +10,5 @@ activity-vocabulary-derive = { version = "0.1.0", path = "../activity-vocabulary
 
 [dependencies]
 activity-vocabulary-core = { version = "0.1.0", path = "../activity-vocabulary-core" }
-serde = { version = "1.0.188", features = ["derive"] }
-url = { version = "2.4.1", features = ["serde"] }
+serde = { version = "1", features = ["derive"] }
+url = { version = "2", features = ["serde"] }

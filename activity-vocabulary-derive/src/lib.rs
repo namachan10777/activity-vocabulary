@@ -98,6 +98,7 @@ enum PreferredPropertyName {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct TypeDef {
+    uri: String,
     #[serde(default = "Default::default")]
     extends: HashSet<String>,
     #[serde(default = "Default::default")]
@@ -109,12 +110,13 @@ struct TypeDef {
     preferred_property_name: HashMap<String, PreferredPropertyName>,
     #[serde(default = "Default::default")]
     except_properties: HashSet<String>,
+    doc: String,
 }
 
 fn collect_properties(
     name: &str,
     defs: &HashMap<String, TypeDef>,
-) -> anyhow::Result<Vec<(String, PropertyDef)>> {
+) -> anyhow::Result<HashMap<String, PropertyDef>> {
     let def = defs
         .get(name)
         .with_context(|| format!("{name} not found"))?;
@@ -126,18 +128,12 @@ fn collect_properties(
         .into_iter()
         .flatten()
         .filter(|(name, _)| !def.except_properties.contains(name))
-        .collect::<Vec<_>>();
-    properties.append(
-        &mut def
-            .properties
-            .iter()
-            .map(|(k, v)| (k.clone(), v.clone()))
-            .collect::<Vec<_>>(),
-    );
+        .collect::<HashMap<_, _>>();
+    properties.extend(def.properties.iter().map(|(k, v)| (k.clone(), v.clone())));
     Ok(properties)
 }
 
-fn generate_properties(properties: &[(String, PropertyDef)]) -> anyhow::Result<TokenStream> {
+fn generate_properties(properties: &HashMap<String, PropertyDef>) -> anyhow::Result<TokenStream> {
     let tokens = properties
         .iter()
         .map(|(name, def)| {
@@ -170,7 +166,7 @@ fn generate_properties(properties: &[(String, PropertyDef)]) -> anyhow::Result<T
 fn generate_serialize_impl(
     name: &str,
     def: &TypeDef,
-    properties: &[(String, PropertyDef)],
+    properties: &HashMap<String, PropertyDef>,
 ) -> anyhow::Result<TokenStream> {
     let name_ident = Ident::new(name, Span::call_site());
     let serializings = properties
@@ -233,7 +229,7 @@ fn generate_serialize_impl(
 
 fn generate_deserialize_impl(
     name: &str,
-    properties: &[(String, PropertyDef)],
+    properties: &HashMap<String, PropertyDef>,
 ) -> anyhow::Result<TokenStream> {
     let name_ident = Ident::new(name, Span::call_site());
     let field_tags = properties
@@ -606,7 +602,7 @@ fn generate_subtypes(name: &str, defs: &HashMap<String, TypeDef>) -> anyhow::Res
             let sub_ident = Ident::new(subtype_name, Span::call_site());
             let common_property_into = super_properties
                 .iter()
-                .filter(|(name, _)| sub_properties.iter().any(|(sub_name, _)| sub_name == name))
+                .filter(|(name, _)| sub_properties.iter().any(|(sub_name, _)| sub_name == *name))
                 .map(|(name, _)| {
                     let ident = Ident::new(name, Span::call_site());
                     quote! {
@@ -616,7 +612,7 @@ fn generate_subtypes(name: &str, defs: &HashMap<String, TypeDef>) -> anyhow::Res
                 .collect::<TokenStream>();
             let fill_properties = super_properties
                 .iter()
-                .filter(|(name, _)| !sub_properties.iter().any(|(sub_name, _)| sub_name == name))
+                .filter(|(name, _)| !sub_properties.iter().any(|(sub_name, _)| sub_name == *name))
                 .map(|(name, _)| {
                     let ident = Ident::new(name, Span::call_site());
                     quote! {
@@ -646,9 +642,16 @@ fn generate_subtypes(name: &str, defs: &HashMap<String, TypeDef>) -> anyhow::Res
         .into_iter()
         .flatten()
         .collect::<TokenStream>();
-
+    let doc_comment = format!(
+        "`{}`\n\n[W3C recommendation]({})\n\n{}",
+        def.uri,
+        doc_link(name),
+        def.doc
+    );
+    let doc_lit = LitStr::new(&doc_comment, Span::call_site());
     Ok(quote! {
         #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, PartialEq)]
+        #[doc = #doc_lit]
         pub enum #subtype_ident {
             #subtype_arms
         }

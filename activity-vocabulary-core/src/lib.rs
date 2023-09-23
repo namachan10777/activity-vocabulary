@@ -23,7 +23,7 @@ impl<T: ObjectId> ObjectId for Remotable<T> {
     }
 }
 
-#[derive(PartialEq, Eq, Clone, Debug, Hash, Default)]
+#[derive(PartialEq, Eq, Clone, Debug, Hash)]
 pub struct Property<T>(Vec<T>);
 
 impl<T: Serialize> Serialize for Property<T> {
@@ -55,6 +55,12 @@ impl<'de, T: Deserialize<'de>> Deserialize<'de> for Property<T> {
                 Err(opt_err) => Err(serde::de::Error::custom(format!("{seq_err} & {opt_err}"))),
             },
         }
+    }
+}
+
+impl<T> Default for Property<T> {
+    fn default() -> Self {
+        Self(Default::default())
     }
 }
 
@@ -115,6 +121,12 @@ impl<L, R> Or<L, R> {
 impl<P, S> From<P> for Or<P, S> {
     fn from(value: P) -> Self {
         Or::Prim(value)
+    }
+}
+
+impl<L: Default, R> Default for Or<L, R> {
+    fn default() -> Self {
+        Or::Prim(L::default())
     }
 }
 

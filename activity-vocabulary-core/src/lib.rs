@@ -24,7 +24,7 @@ impl<T: ObjectId> ObjectId for Remotable<T> {
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Hash)]
-pub struct Property<T>(Vec<T>);
+pub struct Property<T>(pub Vec<T>);
 
 impl<T: Serialize> Serialize for Property<T> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>

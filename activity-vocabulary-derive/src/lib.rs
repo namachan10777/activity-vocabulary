@@ -675,8 +675,16 @@ fn generate_types(defs: HashMap<String, TypeDef>) -> anyhow::Result<TokenStream>
         let quote_properties = generate_properties(&properties)?;
         let quote_name = Ident::new(name, Span::call_site());
         let quote_subtype = generate_subtypes(name, &defs)?;
+        let doc_comment = format!(
+            "`{}`\n\n[W3C recommendation]({})\n\n{}",
+            def.uri,
+            doc_link(name),
+            def.doc
+        );
+        let doc_lit = LitStr::new(&doc_comment, Span::call_site());
         token.append_all(quote! {
             #[derive(Debug, Clone, PartialEq)]
+            #[doc = #doc_lit]
             pub struct #quote_name {
                 #quote_properties
             }

@@ -250,6 +250,13 @@ Link:
       kind: !Required
       doc: Kind of [LinkSubtypes]
 
+    href:
+      type: url::Url
+      uri: https://www.w3.org/ns/activitystreams#href	
+      kind: !Required
+      doc: |
+        The target resource pointed to by a [Link].
+
     rel:
       type: String
       uri: https://www.w3.org/ns/activitystreams#rel	
@@ -326,9 +333,8 @@ Activity:
       type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
       uri: https://www.w3.org/ns/activitystreams#object
       doc: |
-        When used within an [Activity], describes the direct object of the activity.
+        Describes the direct object of the activity.
         For instance, in the activity `John added a movie to his wishlist`, the object of the activity is the movie added.
-        When used within a [Relationship] describes the entity to which the [Activity::subject] is related.
     
     target:
       type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
@@ -454,7 +460,7 @@ OrderedCollectionPage:
   subtype_name: OrderedCollectionPageSubtypes
   extends: [OrderedCollection, CollectionPage]
   doc: |
-    Used to represent ordered subsets of items from an [OrderedCollectionSubtypess].
+    Used to represent ordered subsets of items from an [OrderedCollectionSubtypes].
     Refer to the [Activity Streams 2.0 Core](https://www.w3.org/TR/activitystreams-core/#dfn-orderedcollectionpage)
     for a complete description of the [OrderedCollectionPage] object.
   properties:
@@ -682,6 +688,7 @@ Flag:
 
 Dislike:
   uri: https://www.w3.org/ns/activitystreams#Dislike	
+  extends: [Activity]
   subtype_name: DislikeSubtypes
   doc: |
     Indicates that the [Dislike::actor] dislikes the [Dislike::object].
@@ -694,7 +701,7 @@ Question:
     Represents a question being asked.
     [Question] objects are an extension of [IntransitiveActivity].
     That is, the [Question] object is an [Activity],
-    but the direct object is the question itself and therefore it would not contain an [Question::object] property.
+    but the direct object is the question itself and therefore it would not contain an [Activity::object] property.
     Either of the [Question::any_of] and [Question::one_of] properties may be used to express possible answers,
     but a [Question] object must not have both properties.
   properties:
@@ -752,18 +759,182 @@ Service:
   extends: [Object]
   doc: Represents a service of any kind.
 
+Relationship:
+  uri: https://www.w3.org/ns/activitystreams#Relationship	
+  subtype_name: RelationshipSubtypes
+  extends: [Object]
+  doc: |
+    Describes a relationship between two individuals.
+    The [Relationship::subject] and [Relationship::object] properties are used to identify the connected individuals.
 
+    See [5.2 Representing Relationships Between Entities](https://www.w3.org/TR/activitystreams-vocabulary/#connections) for additional information.
 
+  properties:
+    subject:
+      uri: https://www.w3.org/ns/activitystreams#subject	
+      type: Or<Remotable<Object>, Link>
+      kind: !Functional
+      doc: |
+        On a [Relationship] object, the [Relationship::subject] property identifies one of the connected individuals.
+        For instance, for a [Relationship] object describing `John is related to Sally`, [Relationship::subject] would refer to `John`.
 
+    object:
+      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      uri: https://www.w3.org/ns/activitystreams#object
+      doc: |
+        Describes the entity to which the [Relationship::subject] is related.     
+    
+    relationship:
+      uri: https://www.w3.org/ns/activitystreams#relationship	
+      type: Remotable<Object>
+      doc: |
+        On a [Relationship] object,
+        the [Relationship::relationship] property identifies the kind of relationship that exists between [Relationship::subject] and [Relationship::object].
 
+Article:
+  uri: https://www.w3.org/ns/activitystreams#Article	
+  extends: [Object]
+  subtype_name: ArticleSubtypes
+  doc: Represents any kind of multi-paragraph written work.
+ 
+Document:
+  uri: https://www.w3.org/ns/activitystreams#Document	
+  extends: [Object]
+  subtype_name: DocumentSubtypes
+  doc: Represents a document of any kind.
+ 
+Audio:
+  uri: https://www.w3.org/ns/activitystreams#Audio	
+  extends: [Document]
+  subtype_name: AudioSubtypes
+  doc: Represents an audio document of any kind.
 
+Image:
+  uri: https://www.w3.org/ns/activitystreams#Image	
+  extends: [Document]
+  subtype_name: ImageSubtypes
+  doc: An image document of any kind
 
+Video:
+  uri: https://www.w3.org/ns/activitystreams#Video	
+  extends: [Document]
+  subtype_name: VideoSubtypes
+  doc: Represents a video document of any kind.
 
+Note:
+  uri: https://www.w3.org/ns/activitystreams#Note	
+  extends: [Document]
+  subtype_name: NoteSubtypes
+  doc: Represents a short written work typically less than a single paragraph in length.
 
+Page:
+  uri: https://www.w3.org/ns/activitystreams#Page	
+  extends: [Document]
+  subtype_name: PageSubtypes
+  doc: Represents a Web Page.
 
+Event:
+  uri: https://www.w3.org/ns/activitystreams#Event	
+  extends: [Object]
+  subtype_name: EventSubtypes
+  doc: Represents any kind of event.
 
+Place:
+  uri: https://www.w3.org/ns/activitystreams#Place	
+  extends: [Object]
+  subtype_name: PlaceSubtypes
+  doc: Represents a logical or physical location. See 5.3 Representing Places for additional information.
+  properties:
+    accuracy:
+      type: f64
+      kind: !Functional
+      uri: https://www.w3.org/ns/activitystreams#accuracy	
+      doc:
+        Indicates the accuracy of position coordinates on a [Place] objects.
+        Expressed in properties of percentage. e.g. "94.0" means "94.0% accurate".
 
+    altitude:
+      type: f64
+      kind: !Functional
+      uri: https://www.w3.org/ns/activitystreams#altitude	
+      doc: |
+        Indicates the altitude of a place.
+        The measurement [Place::units] is indicated using the units property.
+        If [Place::units] is not specified, the default is assumed to be "m" indicating meters.
 
+ 
+    latitude:
+      type: f64
+      kind: !Functional
+      uri: https://www.w3.org/ns/activitystreams#latitude	
+      doc: The longitude of a place
+
+    longitude:
+      type: f64
+      kind: !Functional
+      uri: https://www.w3.org/ns/activitystreams#longitude	
+      doc: The longitude of a place
+
+    radius:
+      type: f64
+      kind: !Functional
+      uri: https://www.w3.org/ns/activitystreams#radius
+      doc:
+        The [Place::radius] from the given [Place::latitude] and [Place::longitude] for a [Place].
+        The units is expressed by the [Place::units] property.
+        If [Place::units] is not specified, the default is assumed to be "m" indicating "meters".
+
+    units:
+      type: Unit
+      uri: https://www.w3.org/ns/activitystreams#units	
+      kind: !Required
+      doc: |
+        Specifies the measurement units for the [Place::radius] and [Place::altitude] properties on a [Place] object.
+        If not specified, the default is assumed to be "m" for "meters".
+
+Mention:
+  uri: https://www.w3.org/ns/activitystreams#Mention	
+  extends: [Link]
+  subtype_name: MentionSubtypes
+  doc: |
+    A specialized [Link] that represents an @mention.
+
+Profile:
+  uri: https://www.w3.org/ns/activitystreams#Profile	
+  extends: [Object]
+  subtype_name: ProfileSubtypes
+  doc: |
+    A [Profile] is a content object that describes another [ObjectSubtypes],
+    typically used to describe Actor Type objects.
+    The [Profile::describes] property is used to reference the object being described by the profile.
+  properties:
+    describes:
+      uri: https://www.w3.org/ns/activitystreams#describes	
+      kind: !Functional
+      type: Remotable<Object>
+      doc: |
+        On a [Profile] object, the [Profile::describes] property identifies the object described by the Profile.
+
+Tombstone:
+  uri: https://www.w3.org/ns/activitystreams#Tombstone	
+  extends: [Object]
+  subtype_name: TombstoneSubtypes
+  doc: |
+    A [Tombstone] represents a content object that has been deleted.
+    It can be used in [Collection]s to signify that there used to be an object at this position, but it has been deleted.
+  properties:
+    former_type:
+      uri: https://www.w3.org/ns/activitystreams#formerType	
+      tag: formerType
+      type: String
+      doc: |
+        On a [Tombstone] object, the [Tombstone::former_type] property identifies the type of the object that was deleted.
+
+    deleted:
+      uri: https://www.w3.org/ns/activitystreams#deleted	
+      type: xsd::DateTime
+      doc: |
+        On a [Tombstone] object, the [Tombstone::deleted] property is a timestamp for when the object was deleted.
 
 
 

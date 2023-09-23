@@ -376,13 +376,17 @@ fn generate_deserialize_impl(
                             if let Some(occupied) = #name_ident.as_mut() {
                                 occupied.merge(__map.next_value::<#default>()?);
                             }
-                            #name_ident = Some(__map.next_value::<#default>()?);
+                            else {
+                                #name_ident = Some(__map.next_value::<#default>()?);
+                            }
                         }
                         __Fields::#map_name_ident => {
                             if let Some(occupied) = #map_name_ident.as_mut() {
                                 occupied.merge(__map.next_value::<#per_lang>()?);
                             }
-                            #map_name_ident = Some(__map.next_value::<#per_lang>()?);
+                            else {
+                                #map_name_ident = Some(__map.next_value::<#per_lang>()?);
+                            }
                         }
                     })
                 }
@@ -392,13 +396,17 @@ fn generate_deserialize_impl(
                             if #name_ident.is_some() {
                                 return Err(<A::Error as serde::de::Error>::duplicate_field(#name));
                             }
-                            #name_ident = Some(__map.next_value::<#default>()?);
+                            else {
+                                #name_ident = Some(__map.next_value::<#default>()?);
+                            }
                         }
                         __Fields::#map_name_ident => {
                             if #map_name_ident.is_some() {
                                 return Err(<A::Error as serde::de::Error>::duplicate_field(#map_name));
                             }
-                            #map_name_ident = Some(__map.next_value::<#per_lang>()?);
+                            else {
+                                #map_name_ident = Some(__map.next_value::<#per_lang>()?);
+                            }
                         }
                     })
                 }
@@ -412,7 +420,9 @@ fn generate_deserialize_impl(
                             if let Some(occupied) = #name_ident.as_mut() {
                                 occupied.merge(__map.next_value::<#ty>()?);
                             }
-                            #name_ident = Some(__map.next_value::<#ty>()?);
+                            else {
+                                #name_ident = Some(__map.next_value::<#ty>()?);
+                            }
                         }
                     ))
                 }
@@ -422,7 +432,9 @@ fn generate_deserialize_impl(
                             if #name_ident.is_some() {
                                 return Err(<A::Error as serde::de::Error>::duplicate_field(#name));
                             }
-                            #name_ident = Some(__map.next_value::<#ty>()?);
+                            else {
+                                #name_ident = Some(__map.next_value::<#ty>()?);
+                            }
                         }
                     ))
                 }
@@ -436,20 +448,37 @@ fn generate_deserialize_impl(
     let build_type = properties
         .iter()
         .map(|(name, def)| {
-            let name_ident = Ident::new(name, Span::call_site());
-            let not_found_msg = format!("{} not found", name);
-            if let Some(container) = &def.container {
-                let map_name_ident = Ident::new(&container.tag, Span::call_site());
-                Ok(quote! {
-                    #name_ident: LangContainer {
-                        default: #name_ident.ok_or_else(|| <A::Error as serde::de::Error>::missing_field(#not_found_msg))?,
-                        per_lang: #map_name_ident.ok_or_else(|| <A::Error as serde::de::Error>::missing_field(#not_found_msg))?,
-                    },
-                })
+            if def.kind == PropertyKind::Required {
+                let name_ident = Ident::new(name, Span::call_site());
+                if let Some(container) = &def.container {
+                    let map_name = &container.tag;
+                    let map_name_ident = Ident::new(&map_name, Span::call_site());
+                    Ok(quote! {
+                        #name_ident: LangContainer {
+                            default: #name_ident.ok_or_else(|| serde::de::Error::missing_field(#name))?,
+                            per_lang: #map_name_ident.ok_or_else(|| serde::de::Error::missing_field(#map_name))?,
+                        },
+                    })
+                } else {
+                    Ok(quote! {
+                        #name_ident: #name_ident.ok_or_else(|| serde::de::Error::missing_field(#name))?,
+                    })
+                }
             } else {
-                Ok(quote! {
-                    #name_ident: #name_ident.ok_or_else(|| <A::Error as serde::de::Error>::missing_field(#not_found_msg))?,
-                })
+                let name_ident = Ident::new(name, Span::call_site());
+                if let Some(container) = &def.container {
+                    let map_name_ident = Ident::new(&container.tag, Span::call_site());
+                    Ok(quote! {
+                        #name_ident: LangContainer {
+                            default: #name_ident.unwrap_or_default(),
+                            per_lang: #map_name_ident.unwrap_or_default(),
+                        },
+                    })
+                } else {
+                    Ok(quote! {
+                        #name_ident: #name_ident.unwrap_or_default(),
+                    })
+                }
             }
         })
         .collect::<anyhow::Result<Vec<_>>>()?
@@ -469,6 +498,7 @@ fn generate_deserialize_impl(
                 {
                     const FIELDS: &[&str] = &[#field_tags];
 
+                    #[derive(Debug)]
                     #[allow(non_camel_case_types)]
                     enum __Fields {
                         #fields_enum_defs
@@ -540,7 +570,7 @@ fn generate_deserialize_impl(
                         }
                     }
 
-                    deserializer.deserialize_map(__Visitor)
+                    deserializer.deserialize_struct(#name, FIELDS, __Visitor)
                 }
             }
         };

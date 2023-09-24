@@ -15,4 +15,9 @@ activity-vocabulary-derive = { path = "../activity-vocabulary-derive" }
 [dependencies]
 activity-vocabulary-core = { path = "../activity-vocabulary-core" }
 serde = { workspace = true, features = ["derive"] }
+serde-value = "0.7.0"
 url = { workspace = true, features = ["serde"] }
+
+[dev-dependencies]
+diff = "0.1.13"
+serde_json.workspace = true

@@ -260,13 +260,14 @@ Link:
 
     media_type:
       type: String
+      tag: mediaType
       uri: https://www.w3.org/ns/activitystreams#mediaType
       kind: !Functional
       doc: |
         Identifies the MIME media type of the referenced resource.
 
     name:
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: String
       uri: https://www.w3.org/ns/activitystreams#name
       container:
         type: !Language
@@ -385,6 +386,12 @@ Collection:
         A non-negative integer specifying the total number of objects contained by the logical view of the collection.
         This number might not reflect the actual number of items serialized within the [Collection] object instance.
       kind: !Functional
+
+    items:
+      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      uri: https://www.w3.org/ns/activitystreams#items
+      doc: |
+        Identifies the items contained in a collection. The items might be ordered or unordered.
 
     current:
       type: Box<Or<Remotable<CollectionPageSubtypes>, LinkSubtypes>>
@@ -875,7 +882,7 @@ Place:
     units:
       type: Unit
       uri: https://www.w3.org/ns/activitystreams#units
-      kind: !Required
+      kind: !Functional
       doc: |
         Specifies the measurement units for the [Place::radius] and [Place::altitude] properties on a [Place] object.
         If not specified, the default is assumed to be "m" for "meters".

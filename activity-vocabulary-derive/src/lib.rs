@@ -689,7 +689,8 @@ fn generate_subtypes(name: &str, defs: &HashMap<String, TypeDef>) -> anyhow::Res
     );
     let doc_lit = LitStr::new(&doc_comment, Span::call_site());
     Ok(quote! {
-        #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, PartialEq)]
+        #[derive(serde::Serialize, Debug, Clone, PartialEq)]
+        #[serde(tag = "type")]
         #[doc = #doc_lit]
         pub enum #subtype_ident {
             #subtype_arms
@@ -704,6 +705,111 @@ fn generate_subtypes(name: &str, defs: &HashMap<String, TypeDef>) -> anyhow::Res
         }
 
         #subtype_upcasts
+    })
+}
+
+fn generate_subtypes_deserialize(
+    name: &str,
+    defs: &HashMap<String, TypeDef>,
+) -> anyhow::Result<TokenStream> {
+    let name_ident = Ident::new(name, Span::call_site());
+    let def = defs.get(name).with_context(|| format!("missing {name}"))?;
+    let subtype_ident = Ident::new(&def.subtype_name, Span::call_site());
+    let subtypes = collect_subtypes(name, defs)?;
+    let fields_contents = subtypes
+        .keys()
+        .map(|name| {
+            let ident = Ident::new(name, Span::call_site());
+            quote!(#ident, )
+        })
+        .collect::<TokenStream>();
+    let match_arms = subtypes
+        .keys()
+        .map(|name| {
+            let ident = Ident::new(name, Span::call_site());
+            quote!(
+                __Fields::#ident => Ok(Self::#ident(#ident::deserialize(deserializer)?)),
+            )
+        })
+        .collect::<TokenStream>();
+    let field_enum_match_arms = |bytes: bool| {
+        subtypes
+            .keys()
+            .map(|subtype| {
+                let subtype_ident = Ident::new(subtype, Span::call_site());
+                let v = if bytes {
+                    LitByteStr::new(subtype.as_bytes(), Span::call_site()).into_token_stream()
+                } else {
+                    LitStr::new(subtype, Span::call_site()).into_token_stream()
+                };
+                quote!(#v => Ok(__Fields::#subtype_ident), )
+            })
+            .collect::<TokenStream>()
+    };
+    let field_enum_match_arms_str = field_enum_match_arms(false);
+    let field_enum_match_arms_bytes = field_enum_match_arms(true);
+
+    Ok(quote! {
+        const _:() = {
+            impl<'de> Deserialize<'de> for #subtype_ident {
+                fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+                where
+                    D: serde::Deserializer<'de>,
+                {
+                    use activity_vocabulary_core::TaggedContentVisitor;
+                    #[derive(Debug)]
+                    enum __Fields {
+                        #fields_contents
+                    }
+
+                    struct __FieldsVisitor;
+
+                    impl<'de> Visitor<'de> for __FieldsVisitor {
+                        type Value = __Fields;
+
+                        fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                            formatter.write_str("type")
+                        }
+
+                        fn visit_str<E: serde::de::Error>(
+                            self,
+                            value: &str
+                        ) -> Result<Self::Value, E> {
+                            match value {
+                                #field_enum_match_arms_str
+                                _ => Err(serde::de::Error::missing_field("type"))
+                            }
+                        }
+
+                        fn visit_bytes<E: serde::de::Error>(
+                            self,
+                            value: &[u8]
+                        ) -> Result<Self::Value, E> {
+                            match value {
+                                #field_enum_match_arms_bytes
+                                _ => Err(serde::de::Error::missing_field("type")),
+                            }
+                        }
+                    }
+
+                    impl<'de> Deserialize<'de> for __Fields {
+                        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+                        where
+                            D: serde::Deserializer<'de>,
+                        {
+                            deserializer.deserialize_any(__FieldsVisitor)
+                        }
+                    }
+
+                    let (tag, content) = deserializer.deserialize_any(TaggedContentVisitor::<__Fields>::new(#name, "type"))?;
+                    let deserializer = serde_value::ValueDeserializer::new(content);
+                    match tag {
+                        #match_arms
+                    }
+                }
+            }
+        };
+
     })
 }
 
@@ -731,6 +837,7 @@ fn generate_types(defs: HashMap<String, TypeDef>) -> anyhow::Result<TokenStream>
         token.append_all(generate_serialize_impl(name, def, &properties)?);
         token.append_all(generate_deserialize_impl(name, &properties)?);
         token.append_all(quote_subtype);
+        token.append_all(generate_subtypes_deserialize(name, &defs)?);
     }
     Ok(token)
 }
@@ -741,7 +848,6 @@ pub fn define_types<P: AsRef<Path>>(path: P) -> anyhow::Result<String> {
     let src = generate_types(def)?;
     let src = quote! {
         use activity_vocabulary_core::*;
-
         #src
     };
     let src = RustFmt::new().format_tokens(src)?;

@@ -1,10 +1,15 @@
-use std::{collections::HashMap, hash::Hash};
+use std::{
+    collections::{BTreeMap, HashMap},
+    fmt::Debug,
+    hash::Hash,
+    marker::PhantomData,
+};
 
 use serde::{de::Visitor, ser::SerializeSeq, Deserialize, Serialize};
 
 pub mod xsd;
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Hash)]
+#[derive(PartialEq, Eq, Clone, Debug, Hash)]
 pub enum Remotable<T> {
     Remote(url::Url),
     Inline(T),
@@ -19,6 +24,34 @@ impl<T: ObjectId> ObjectId for Remotable<T> {
         match self {
             Remotable::Remote(id) => Some(id),
             Remotable::Inline(object) => object.object_id(),
+        }
+    }
+}
+
+impl<T: Serialize> Serialize for Remotable<T> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match self {
+            Remotable::Inline(inline) => inline.serialize(serializer),
+            Remotable::Remote(remote) => remote.serialize(serializer),
+        }
+    }
+}
+
+impl<'de, T: Deserialize<'de>> Deserialize<'de> for Remotable<T> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value = serde_value::Value::deserialize(deserializer)?;
+        let deserializer = serde_value::ValueDeserializer::<D::Error>::new(value.clone());
+        match T::deserialize(deserializer) {
+            Ok(inline) => Ok(Self::Inline(inline)),
+            Err(inline_err) => url::Url::deserialize(serde_value::ValueDeserializer::new(value))
+                .map_err(|e: D::Error| serde::de::Error::custom(format!("{inline_err} & {e}")))
+                .map(Self::Remote),
         }
     }
 }
@@ -326,4 +359,49 @@ pub struct WithContext<T> {
     pub context: Context,
     #[serde(flatten)]
     pub body: T,
+}
+
+pub struct TaggedContentVisitor<T> {
+    name: &'static str,
+    tag: &'static str,
+    _tag: PhantomData<T>,
+}
+
+impl<T> TaggedContentVisitor<T> {
+    pub fn new(name: &'static str, tag: &'static str) -> Self {
+        Self {
+            name,
+            tag,
+            _tag: Default::default(),
+        }
+    }
+}
+
+impl<'de, T: Deserialize<'de> + Debug> Visitor<'de> for TaggedContentVisitor<T> {
+    type Value = (T, serde_value::Value);
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str(self.name)
+    }
+
+    fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::MapAccess<'de>,
+    {
+        let mut content = BTreeMap::new();
+        let mut tag = None;
+        while let Some((k, v)) = map.next_entry::<serde_value::Value, serde_value::Value>()? {
+            if let serde_value::Value::String(k_str) = &k {
+                if k_str == self.tag {
+                    let deserializer = serde_value::ValueDeserializer::new(v.clone());
+                    tag = Some(T::deserialize(deserializer)?);
+                }
+            }
+            content.insert(k, v);
+        }
+        Ok((
+            tag.ok_or_else(|| serde::de::Error::missing_field(self.tag))?,
+            serde_value::Value::Map(content),
+        ))
+    }
 }

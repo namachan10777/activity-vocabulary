@@ -12,5 +12,6 @@ name = "activity-vocabulary-core"
 chrono = { workspace = true, features = ["std"] }
 nom = { version = "7", default-features = false }
 serde = { workspace = true, features = ["derive"] }
+serde-value = "0.7.0"
 serde_json.workspace = true
 url = { workspace = true, features = ["serde"] }

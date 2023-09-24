@@ -275,25 +275,15 @@ fn generate_deserialize_impl(
         .iter()
         .map(|(name, def)| {
             let ident = Ident::new(name, Span::call_site());
-            let aka = def
-                .aka
-                .iter()
-                .map(|name| quote!(#name, ))
-                .collect::<TokenStream>();
             if let Some(container) = &def.container {
                 match container.container_type {
                     ContainerType::Language => {
                         let map_ident = Ident::new(&container.tag, Span::call_site());
-                        let container_aka = container
-                            .aka
-                            .iter()
-                            .map(|tag| quote!(#tag, ))
-                            .collect::<TokenStream>();
-                        quote!(#aka #container_aka #ident, #map_ident,)
+                        quote!(#ident, #map_ident,)
                     }
                 }
             } else {
-                quote!(#aka #ident,)
+                quote!(#ident,)
             }
         })
         .collect::<TokenStream>();

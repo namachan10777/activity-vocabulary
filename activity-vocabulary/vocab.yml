@@ -390,6 +390,8 @@ Collection:
     items:
       type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
       uri: https://www.w3.org/ns/activitystreams#items
+      aka:
+        - orderedItems
       doc: |
         Identifies the items contained in a collection. The items might be ordered or unordered.
 
@@ -420,9 +422,8 @@ OrderedCollection:
   extends: [Collection]
   doc: |
     A subtype of [Collection] in which members of the logical collection are assumed to always be strictly ordered.
-  preferreed_property_name:
-    items: !Simple
-      - "orderedItems"
+  preferred_property_name:
+    items: !Simple "orderedItems"
 CollectionPage:
   uri: https://www.w3.org/ns/activitystreams#CollectionPage
   subtype_name: CollectionPageSubtypes
@@ -469,9 +470,9 @@ OrderedCollectionPage:
       kind: !Functional
       doc: |
         A non-negative integer value identifying the relative position within the logical view of a strictly ordered collection.
-  preferreed_property_name:
-    items: !Simple
-      - "orderedItems"
+  preferred_property_name:
+    items: !Simple "orderedItems"
+
 Accept:
   uri: https://www.w3.org/ns/activitystreams#Accept
   subtype_name: AcceptSubtypes

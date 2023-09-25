@@ -11,6 +11,8 @@ use rust_format::{Formatter, RustFmt};
 use serde::{Deserialize, Serialize};
 use syn::{LitByteStr, LitStr};
 
+pub mod gen;
+
 const W3C_DOC_BASE: &str = "https://www.w3.org/TR/activitystreams-vocabulary";
 
 fn doc_link(name: &str) -> String {

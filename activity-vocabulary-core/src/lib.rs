@@ -197,13 +197,13 @@ pub trait MergeableProperty {
 
 impl<T> MergeableProperty for Property<T> {
     fn merge(&mut self, other: Self) {
-        self.0.extend(other.0.into_iter())
+        self.0.extend(other.0)
     }
 }
 
 impl<K: Eq + Hash, V> MergeableProperty for HashMap<K, V> {
     fn merge(&mut self, other: Self) {
-        self.extend(other.into_iter())
+        self.extend(other)
     }
 }
 
@@ -237,17 +237,15 @@ impl Serialize for Context {
             } else {
                 self.urls.serialize(serializer)
             }
+        } else if self.urls.is_empty() {
+            self.inline.serialize(serializer)
         } else {
-            if self.urls.is_empty() {
-                self.inline.serialize(serializer)
-            } else {
-                let mut serializer = serializer.serialize_seq(Some(self.urls.len() + 1))?;
-                for url in &self.urls {
-                    serializer.serialize_element(url)?;
-                }
-                serializer.serialize_element(&self.inline)?;
-                serializer.end()
+            let mut serializer = serializer.serialize_seq(Some(self.urls.len() + 1))?;
+            for url in &self.urls {
+                serializer.serialize_element(url)?;
             }
+            serializer.serialize_element(&self.inline)?;
+            serializer.end()
         }
     }
 }

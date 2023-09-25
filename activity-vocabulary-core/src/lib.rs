@@ -179,6 +179,12 @@ impl<T> SkipSerialization for Property<T> {
     }
 }
 
+impl<K, V> SkipSerialization for HashMap<K, V> {
+    fn should_skip(&self) -> bool {
+        self.is_empty()
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct LangContainer<T> {
     pub default: Option<T>,

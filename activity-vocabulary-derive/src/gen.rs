@@ -57,6 +57,7 @@ pub struct TypeDef {
     pub uri: String,
     #[serde(default)]
     pub extends: HashSet<String>,
+    #[serde(default)]
     pub properties: HashMap<String, PropertyDef>,
     #[serde(default)]
     pub preferred_property_name: HashMap<String, PreferredPropertyName>,
@@ -82,12 +83,12 @@ impl PropertyKind {
     ) -> TokenStream {
         if self == &Self::Required {
             quote! {
-                #serializer.serialize(#tag, #property)?;
+                #serializer.serialize_entry(#tag, #property)?;
             }
         } else {
             quote! {
-                if !#property.should_skip() {
-                    #serializer.serialize(#tag, #property)?;
+                if ! ::activity_vocabulary_core::SkipSerialization::should_skip(#property) {
+                    #serializer.serialize_entry(#tag, #property)?;
                 }
             }
         }
@@ -238,6 +239,7 @@ fn gen_type(
         .collect::<anyhow::Result<TokenStream>>()?;
     let type_name = ident(type_name);
     Ok(quote! {
+        #[derive(Debug, Clone, PartialEq)]
         pub struct #type_name {
             #properties
         }
@@ -303,7 +305,7 @@ fn gen_serialize_impl(
     })
 }
 
-fn aux_conatiner_name(name: &str) -> String {
+fn aux_container_name(name: &str) -> String {
     format!("__container_{name}")
 }
 
@@ -323,7 +325,7 @@ fn gen_label_deserialize_helper(map: HashMap<String, String>) -> TokenStream {
         .map(|(k, v)| {
             let k = LitStr::new(k, Span::call_site());
             let v = ident(v);
-            quote!(#k => Ok(__Label::#v))
+            quote!(#k => Ok(__Label::#v),)
         })
         .collect::<TokenStream>();
 
@@ -332,13 +334,14 @@ fn gen_label_deserialize_helper(map: HashMap<String, String>) -> TokenStream {
         .map(|(k, v)| {
             let k = LitByteStr::new(k.as_bytes(), Span::call_site());
             let v = ident(v);
-            quote!(#k => Ok(__Label::#v))
+            quote!(#k => Ok(__Label::#v),)
         })
         .collect::<TokenStream>();
 
     quote! {
         #[allow(non_camel_case_types)]
-        enum __Label { #labels, __Ignore(String) }
+        #[derive(Debug)]
+        enum __Label { #labels __Ignore(String) }
 
         struct __LabelVisitor;
 
@@ -355,7 +358,7 @@ fn gen_label_deserialize_helper(map: HashMap<String, String>) -> TokenStream {
             ) -> Result<Self::Value, E> {
                 match value {
                     #label_arms_str
-                    value => Ok(__Fields::__Ignore(value.to_owned())),
+                    value => Ok(__Label::__Ignore(value.to_owned())),
                 }
             }
 
@@ -365,8 +368,17 @@ fn gen_label_deserialize_helper(map: HashMap<String, String>) -> TokenStream {
             ) -> Result<Self::Value, E> {
                 match value {
                     #label_arms_bytes
-                    value => Ok(__Fields::__Ignore(String::from_utf8_lossy(value.to_vec()).to_string()))
+                    value => Ok(__Label::__Ignore(String::from_utf8_lossy(value).to_string()))
                 }
+            }
+        }
+
+        impl<'de> ::serde::Deserialize<'de> for __Label {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: ::serde::Deserializer<'de>,
+            {
+                deserializer.deserialize_identifier(__LabelVisitor)
             }
         }
     }
@@ -401,7 +413,7 @@ fn gen_label_deserialize_helper_for_struct(
                     let per_lang = container_aka
                         .iter()
                         .chain(std::iter::once(container_tag))
-                        .map(|tag| (tag.to_owned(), aux_conatiner_name(name)));
+                        .map(|tag| (tag.to_owned(), aux_container_name(name)));
                     default.chain(per_lang).collect::<Vec<_>>()
                 }
             })
@@ -412,11 +424,14 @@ fn gen_label_deserialize_helper_for_struct(
 fn gen_field_placeholder_for_struct(name: &str, def: &PropertyDef) -> anyhow::Result<TokenStream> {
     let name_ident = ident(name);
     match def {
-        PropertyDef::Simple { .. } => Ok(quote! {
-            let mut #name_ident = None;
-        }),
+        PropertyDef::Simple { .. } => {
+            let ty = def.gen_type()?;
+            Ok(quote! {
+                let mut #name_ident = Option::<#ty>::None;
+            })
+        }
         PropertyDef::LangContainer { .. } => {
-            let per_lang_ident = ident(&aux_conatiner_name(name));
+            let per_lang_ident = ident(&aux_container_name(name));
             Ok(quote! {
                 let mut #name_ident = None;
                 let mut #per_lang_ident = None;
@@ -436,7 +451,7 @@ fn gen_insert_deserialized_field(
             __Label::#name => {
                 let value = __map.next_value::<#ty>()?;
                 if let Some(occupied) = #name.as_mut() {
-                    ::activity_vocabulary_core::Mergeable::merge(occupied, value);
+                    ::activity_vocabulary_core::MergeableProperty::merge(occupied, value);
                 }
                 else {
                     #name = Some(value);
@@ -448,7 +463,7 @@ fn gen_insert_deserialized_field(
             __Label::#name => {
                 let value = __map.next_value::<#ty>()?;
                 if #name.is_some() {
-                    return Err(::serde::de::Error::duplicated(#err_label))
+                    return Err(::serde::de::Error::duplicate_field(#err_label))
                 }
                 else {
                     #name = Some(value);
@@ -481,8 +496,8 @@ fn gen_deserialize_match_arm_for_struct(
             let ty = kind.wrap_type(ty);
             let default = gen_insert_deserialized_field(ident(name), ty.clone(), name, kind);
             let per_lang = gen_insert_deserialized_field(
-                ident(&aux_conatiner_name(name)),
-                syn::parse2(quote!(HashMap<String, #ty>)).unwrap(),
+                ident(&aux_container_name(name)),
+                syn::parse2(quote!(::std::collections::HashMap<String, #ty>)).unwrap(),
                 name,
                 kind,
             );
@@ -497,20 +512,16 @@ fn gen_build_field(name: &str, def: &PropertyDef) -> anyhow::Result<TokenStream>
         PropertyDef::Simple { kind, .. } => {
             if kind == &PropertyKind::Required {
                 Ok(quote! {
-                    #name_ident: #name_ident.ok_or_else(|| serde::de::Error::missing_field(#name))?,
+                    #name_ident: #name_ident.ok_or_else(|| serde::de::Error::missing_field(#name))?
                 })
             } else {
                 Ok(quote! {
-                    #name_ident: #name_ident.unwrap_or_default(),
+                    #name_ident: #name_ident.unwrap_or_default()
                 })
             }
         }
-        PropertyDef::LangContainer {
-            container_tag,
-            kind,
-            ..
-        } => {
-            let per_lang_ident = ident(&aux_conatiner_name(container_tag));
+        PropertyDef::LangContainer { kind, .. } => {
+            let per_lang_ident = ident(&aux_container_name(name));
             if kind == &PropertyKind::Required {
                 Ok(quote! {
                     #name_ident: {
@@ -518,19 +529,19 @@ fn gen_build_field(name: &str, def: &PropertyDef) -> anyhow::Result<TokenStream>
                             return Err(::serde::de::Error::missing_field(#name));
                         }
                         else {
-                            LangContainer {
-                                default: #name_ident.unwrap_or_default(),
+                            ::activity_vocabulary_core::LangContainer {
+                                default: #name_ident,
                                 per_lang: #per_lang_ident.unwrap_or_default(),
                             }
                         }
-                    },
+                    }
                 })
             } else {
                 Ok(quote! {
-                    #name_ident: LangContainer {
-                        default: #name_ident.unwrap_or_default(),
+                    #name_ident: ::activity_vocabulary_core::LangContainer {
+                        default: #name_ident,
                         per_lang: #per_lang_ident.unwrap_or_default(),
-                    },
+                    }
                 })
             }
         }
@@ -544,10 +555,7 @@ fn gen_impl_visitor_for_struct(
     let type_ident = ident(type_name);
     let field_placeholders = properties
         .iter()
-        .map(|(name, def)| {
-            let placeholder = gen_field_placeholder_for_struct(name, def)?;
-            Ok(quote!(#placeholder,))
-        })
+        .map(|(name, def)| gen_field_placeholder_for_struct(name, def))
         .collect::<anyhow::Result<TokenStream>>()?;
     let deserialize_match_arms = properties
         .iter()
@@ -580,10 +588,11 @@ fn gen_impl_visitor_for_struct(
                     A: serde::de::MapAccess<'de>,
             {
                 #field_placeholders
-                while let Some(__key) = __map.next_key::<__Fields>()? {
+                while let Some(__key) = __map.next_key::<__Label>()? {
+                    dbg!(&__key);
                     match __key {
                         #deserialize_match_arms
-                        _ => {
+                        __Label::__Ignore(_) => {
                             let _ = __map.next_value::<serde::de::IgnoredAny>();
                         }
                     }
@@ -594,6 +603,32 @@ fn gen_impl_visitor_for_struct(
     })
 }
 
+fn gen_tags(properties: &HashMap<String, PropertyDef>) -> Vec<String> {
+    properties
+        .iter()
+        .flat_map(|(name, tag)| match tag {
+            PropertyDef::Simple { tag, aka, .. } => aka
+                .clone()
+                .into_iter()
+                .chain(std::iter::once(tag.clone().unwrap_or_else(|| name.clone())))
+                .collect::<Vec<_>>(),
+            PropertyDef::LangContainer {
+                tag,
+                container_tag,
+                aka,
+                container_aka,
+                ..
+            } => aka
+                .clone()
+                .into_iter()
+                .chain(std::iter::once(tag.clone().unwrap_or_else(|| name.clone())))
+                .chain(container_aka.clone().into_iter())
+                .chain(std::iter::once(container_tag.clone()))
+                .collect::<Vec<_>>(),
+        })
+        .collect()
+}
+
 fn gen_deserialize_impl(
     type_name: &str,
     type_def: &TypeDef,
@@ -601,8 +636,8 @@ fn gen_deserialize_impl(
 ) -> anyhow::Result<TokenStream> {
     let properties = collect_properties(type_def, full_defs)?;
     let type_ident = ident(type_name);
-    let struct_key_strs = properties
-        .keys()
+    let struct_key_strs = gen_tags(&properties)
+        .into_iter()
         .map(|k| quote!(#k,))
         .collect::<TokenStream>();
 
@@ -616,7 +651,7 @@ fn gen_deserialize_impl(
                 where
                     D: ::serde::Deserializer<'de>,
                 {
-                    const FIELDS: &[&str] = [ #struct_key_strs ];
+                    const FIELDS: &[&str] = &[ #struct_key_strs ];
 
                     #label_helper
                     #visitor
@@ -647,11 +682,11 @@ fn collect_subtypes<'a>(
 }
 
 fn gen_upcasts(
-    type_name: &str,
-    type_def: &TypeDef,
-    full_defs: &HashMap<String, TypeDef>,
+    _type_name: &str,
+    _type_def: &TypeDef,
+    _full_defs: &HashMap<String, TypeDef>,
 ) -> TokenStream {
-    unimplemented!()
+    quote!()
 }
 
 fn gen_subtypes(
@@ -670,6 +705,7 @@ fn gen_subtypes(
     let ident = ident(&format!("{type_name}Subtypes"));
     Ok(quote! {
         #[derive(Debug, PartialEq, Clone, ::serde::Serialize)]
+        #[serde(tag = "type")]
         pub enum #ident {
             #contents
         }
@@ -677,17 +713,17 @@ fn gen_subtypes(
 }
 
 fn gen_subtype_upcast(
-    type_name: &str,
-    type_def: &TypeDef,
-    full_defs: &HashMap<String, TypeDef>,
+    _type_name: &str,
+    _type_def: &TypeDef,
+    _full_defs: &HashMap<String, TypeDef>,
 ) -> TokenStream {
     quote! {}
 }
 
 fn gen_subtypes_upcasts(
-    type_name: &str,
-    type_def: &TypeDef,
-    full_defs: &HashMap<String, TypeDef>,
+    _type_name: &str,
+    _type_def: &TypeDef,
+    _full_defs: &HashMap<String, TypeDef>,
 ) -> TokenStream {
     quote! {}
 }
@@ -699,10 +735,6 @@ fn gen_subtypes_deserialize(
 ) -> anyhow::Result<TokenStream> {
     let subtype_ident = ident(&format!("{type_name}Subtypes"));
     let subtypes = collect_subtypes(type_name, type_def, full_defs)?;
-    let tag_strs = subtypes
-        .keys()
-        .map(|tag| quote!(#tag,))
-        .collect::<TokenStream>();
     let label_helper = gen_label_deserialize_helper(
         subtypes
             .keys()
@@ -713,9 +745,15 @@ fn gen_subtypes_deserialize(
         .keys()
         .map(|name| {
             let ident = ident(name);
-            quote! { __Label::#ident => Ok(Self::#ident(#ident::deserialize(deserializer))), }
+            quote! { __Label::#ident => Ok(#subtype_ident::#ident(#ident::deserialize(deserializer)?)), }
         })
         .collect::<TokenStream>();
+
+    let expected = subtypes
+        .keys()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>()
+        .join(", ");
 
     Ok(quote! {
         const _:() = {
@@ -724,31 +762,15 @@ fn gen_subtypes_deserialize(
                 where
                     D: ::serde::Deserializer<'de>,
                 {
-                    const FIELDS: &[&str] = [ #tag_strs ];
-
                     #label_helper
-                    struct __Visitor;
 
-                    impl<'de> ::serde::de::Visitor<'de> for __Visitor {
-                        type Value = #subtype_ident;
-
-                        fn visit_map<A>(
-                            self,
-                            mut __map: A,
-                        ) -> Result<Self::Value, A::Error>
-                            where
-                                A: serde::de::MapAccess<'de>,
-                        {
-                            let (tag, container) = deserializer.deserialize_any(
-                                ::activity_vocabulary_core::TaggedContentVisitor::<__Label>::new(#type_name, "type")
-                            )?;
-                            let deserializer = ::serde_value::ValueDeserializer::new(content);
-                            match tag {
-                                #arms
-                                _ => unreachable!()
-                            }
-                        }
-                        deserializer.deserialize_struct(#type_name, FIELDS, __Visitor)
+                    let (tag, content) = deserializer.deserialize_any(
+                        ::activity_vocabulary_core::TaggedContentVisitor::<__Label>::new(#type_name, "type")
+                    )?;
+                    let deserializer = ::serde_value::ValueDeserializer::new(content);
+                    match tag {
+                        #arms
+                        __Label::__Ignore(name) => Err(::serde::de::Error::invalid_type(::serde::de::Unexpected::Str(&name), &#expected))
                     }
                 }
             }
@@ -768,6 +790,7 @@ fn gen_set(
     let subtypes_deserialize_impl = gen_subtypes_deserialize(name, def, defs)?;
     let upcasts = gen_upcasts(name, def, defs);
     let subtypes_upcasts = gen_subtypes_upcasts(name, def, defs);
+    let subtype_upcast = gen_subtype_upcast(name, def, defs);
     Ok(quote! {
         #type_def
         #serialize_impl
@@ -776,6 +799,7 @@ fn gen_set(
         #subtypes_deserialize_impl
         #upcasts
         #subtypes_upcasts
+        #subtype_upcast
     })
 }
 

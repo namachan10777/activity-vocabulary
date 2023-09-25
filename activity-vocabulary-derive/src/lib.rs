@@ -704,7 +704,6 @@ fn generate_subtypes_deserialize(
     name: &str,
     defs: &HashMap<String, TypeDef>,
 ) -> anyhow::Result<TokenStream> {
-    let name_ident = Ident::new(name, Span::call_site());
     let def = defs.get(name).with_context(|| format!("missing {name}"))?;
     let subtype_ident = Ident::new(&def.subtype_name, Span::call_site());
     let subtypes = collect_subtypes(name, defs)?;

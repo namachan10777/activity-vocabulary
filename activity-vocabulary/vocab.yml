@@ -43,12 +43,10 @@ Object:
         Identifies one or more entities that represent the total population of entities
         for which the object can considered to be relevant.
 
-    content: !Language
+    content: !LangContainer
       type: String
       uri: https://www.w3.org/ns/activitystreams#content
-      container:
-        type: !Language
-        tag: contentMap
+      container_tag: contentMap
       doc: |
         The content or textual representation of the Object encoded as a JSON string.
         By default, the value of content is HTML.
@@ -65,12 +63,10 @@ Object:
         The intended function is to serve as a means of grouping objects and activities that share a common originating context or purpose.
         An example could be all activities relating to a common project or event.
 
-    name: !Language
+    name: !LangContainer
       type: String
       uri: https://www.w3.org/ns/activitystreams#name
-      container:
-        type: !Language
-        tag: nameMap
+      container_tag: nameMap
       doc: |
         A simple, human-readable, plain-text name for the object.
         HTML markup **must not** be included. The name may be expressed using multiple language-tagged values.
@@ -147,12 +143,10 @@ Object:
         When used with an [Activity] object, for instance,
         the [Activity::start_time] property specifies the moment the activity began or is scheduled to begin.
 
-    summary: !Language
+    summary: !LangContainer
       type: String
       uri: https://www.w3.org/ns/activitystreams#summary
-      container:
-        type: !Language
-        tag: summaryMap
+      container_tag: summaryMap
       doc: |
         A natural language summarization of the object encoded as HTML.
         Multiple language tagged summaries **may** be provided.
@@ -275,12 +269,10 @@ Link:
       doc: |
         Identifies the MIME media type of the referenced resource.
 
-    name: !Language
+    name: !LangContainer
       type: String
       uri: https://www.w3.org/ns/activitystreams#name
-      container:
-        type: !Language
-        tag: nameMap
+      container_tag: nameMap
       doc: |
         A simple, human-readable, plain-text name for the object.
         HTML markup **must not** be included. The name may be expressed using multiple language-tagged values.
@@ -913,7 +905,7 @@ Profile:
     typically used to describe Actor Type objects.
     The [Profile::describes] property is used to reference the object being described by the profile.
   properties:
-    describes:
+    describes: !Simple
       uri: https://www.w3.org/ns/activitystreams#describes
       kind: !Functional
       type: Remotable<Object>
@@ -928,14 +920,14 @@ Tombstone:
     A [Tombstone] represents a content object that has been deleted.
     It can be used in [Collection]s to signify that there used to be an object at this position, but it has been deleted.
   properties:
-    former_type:
+    former_type: !Simple
       uri: https://www.w3.org/ns/activitystreams#formerType
       tag: formerType
       type: String
       doc: |
         On a [Tombstone] object, the [Tombstone::former_type] property identifies the type of the object that was deleted.
 
-    deleted:
+    deleted: !Simple
       uri: https://www.w3.org/ns/activitystreams#deleted
       type: xsd::DateTime
       kind: !Functional

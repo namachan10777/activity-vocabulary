@@ -1,5 +1,6 @@
 use std::{fmt::Display, str::FromStr};
 
+use activity_vocabulary_core::*;
 use serde::{de::Visitor, Deserialize, Serialize};
 
 include!(concat!(env!("OUT_DIR"), "/vocab.rs"));

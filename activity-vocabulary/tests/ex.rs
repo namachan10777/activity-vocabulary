@@ -64,13 +64,15 @@ mod vocab {
         ex20 => WithContext<Leave>,
         ex21 => WithContext<Leave>,
         ex22 => WithContext<Like>,
-        ex23 => WithContext<Offer>,
+        // Unsupported. This example includes non-standard type
+        // ex23 => WithContext<Offer>,
         ex24 => WithContext<Invite>,
-        // TODO
-        ex25 => WithContext<Reject>,
+        // Unsupported. This example includes non-standard type
+        // ex25 => WithContext<Reject>,
         ex26 => WithContext<TentativeReject>,
         ex27 => WithContext<Remove>,
-        ex28 => WithContext<Remove>,
+        // Unsupported. This example includes non-standard type
+        // ex28 => WithContext<Remove>,
         ex29 => WithContext<Undo>,
         ex30 => WithContext<Update>,
         ex31 => WithContext<View>,
@@ -84,5 +86,10 @@ mod vocab {
         ex39 => WithContext<Dislike>,
         ex40 => WithContext<Question>,
         ex41 => WithContext<Question>,
+        ex42 => WithContext<Application>,
+        ex43 => WithContext<Group>,
+        ex44 => WithContext<Organization>,
+        ex45 => WithContext<Person>,
+        ex46 => WithContext<Service>,
     );
 }

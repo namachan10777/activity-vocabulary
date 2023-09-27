@@ -61,7 +61,9 @@ impl Display for DateTime {
                     "{year:04}-{month:02}-{day:02}T{hour:02}:{minute:02}:{second:02}.{submilli:04}"
                 ))
             }
-            Self::WithOffset(datetime) => f.write_str(&datetime.to_rfc3339()),
+            Self::WithOffset(datetime) => {
+                f.write_str(&datetime.to_rfc3339_opts(chrono::SecondsFormat::Secs, false))
+            }
         }
     }
 }

@@ -1,5 +1,4 @@
 use activity_vocabulary::*;
-use activity_vocabulary_core::WithContext;
 use std::{fs, path::Path};
 
 use serde::{Deserialize, Serialize};
@@ -39,6 +38,7 @@ macro_rules! gen_tests {
 
 mod vocab {
     use super::*;
+    use activity_vocabulary_core::*;
 
     gen_tests!(
         "vocab",
@@ -50,5 +50,38 @@ mod vocab {
         ex6 => WithContext<OrderedCollection>,
         ex7 => WithContext<CollectionPage>,
         ex8 => WithContext<OrderedCollectionPage>,
+        ex9 => WithContext<Accept>,
+        ex10 => WithContext<Accept>,
+        ex11 => WithContext<TentativeAccept>,
+        ex12 => WithContext<Add>,
+        ex13 => WithContext<Add>,
+        ex14 => WithContext<Arrive>,
+        ex15 => WithContext<Create>,
+        ex16 => WithContext<Delete>,
+        ex17 => WithContext<Follow>,
+        ex18 => WithContext<Ignore>,
+        ex19 => WithContext<Join>,
+        ex20 => WithContext<Leave>,
+        ex21 => WithContext<Leave>,
+        ex22 => WithContext<Like>,
+        ex23 => WithContext<Offer>,
+        ex24 => WithContext<Invite>,
+        ex25 => WithContext<Reject>,
+        ex26 => WithContext<TentativeReject>,
+        ex27 => WithContext<Remove>,
+        ex28 => WithContext<Remove>,
+        ex29 => WithContext<Undo>,
+        ex30 => WithContext<Update>,
+        ex31 => WithContext<View>,
+        ex32 => WithContext<Listen>,
+        ex33 => WithContext<Read>,
+        ex34 => WithContext<Move>,
+        ex35 => WithContext<Travel>,
+        ex36 => WithContext<Announce>,
+        ex37 => WithContext<Block>,
+        ex38 => WithContext<Flag>,
+        ex39 => WithContext<Dislike>,
+        ex40 => WithContext<Question>,
+        ex41 => WithContext<Question>,
     );
 }

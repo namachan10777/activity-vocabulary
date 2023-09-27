@@ -66,6 +66,7 @@ mod vocab {
         ex22 => WithContext<Like>,
         ex23 => WithContext<Offer>,
         ex24 => WithContext<Invite>,
+        // TODO
         ex25 => WithContext<Reject>,
         ex26 => WithContext<TentativeReject>,
         ex27 => WithContext<Remove>,

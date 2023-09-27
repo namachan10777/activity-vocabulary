@@ -8,7 +8,7 @@
   },
   "object": {
     "type": "Invite",
-    "actor": "http://john.example.org",
+    "actor": "http://john.example.org/",
     "object": {
       "type": "Event",
       "name": "Going-Away Party for Jim"

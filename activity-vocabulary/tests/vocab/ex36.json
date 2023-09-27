@@ -4,12 +4,12 @@
   "type": "Announce",
   "actor": {
     "type": "Person",
-    "id": "http://sally.example.org",
+    "id": "http://sally.example.org/",
     "name": "Sally"
   },
   "object": {
     "type": "Arrive",
-    "actor": "http://sally.example.org",
+    "actor": "http://sally.example.org/",
     "location": {
       "type": "Place",
       "name": "Work"

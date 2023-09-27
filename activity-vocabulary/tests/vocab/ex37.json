@@ -2,6 +2,6 @@
   "@context": "https://www.w3.org/ns/activitystreams",
   "summary": "Sally blocked Joe",
   "type": "Block",
-  "actor": "http://sally.example.org",
-  "object": "http://joe.example.org"
+  "actor": "http://sally.example.org/",
+  "object": "http://joe.example.org/"
 }

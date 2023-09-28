@@ -355,8 +355,8 @@ impl<'de> Deserialize<'de> for Context {
 
 #[derive(Serialize, Deserialize)]
 pub struct WithContext<T> {
-    #[serde(rename = "@context")]
-    pub context: Context,
+    #[serde(rename = "@context", skip_serializing_if = "Option::is_none")]
+    pub context: Option<Context>,
     #[serde(flatten)]
     pub body: T,
 }

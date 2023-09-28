@@ -176,7 +176,6 @@ Object:
     url:
       type: Or<url::Url, LinkSubtypes>
       uri: https://www.w3.org/ns/activitystreams#url
-      kind: !Functional
       doc: |
         Identifies one or more links to representations of the object
 
@@ -258,6 +257,16 @@ Link:
         The value must conform to both the [HTML5](https://datatracker.ietf.org/doc/html/rfc2119)
         and [RFC5988](https://datatracker.ietf.org/doc/html/rfc5988) `link relation` definitions.
 
+    summary:
+      type: String
+      uri: https://www.w3.org/ns/activitystreams#summary
+      container:
+        type: !Language
+        tag: summaryMap
+      doc: |
+        A natural language summarization of the object encoded as HTML.
+        Multiple language tagged summaries **may** be provided.
+
     media_type:
       type: String
       tag: mediaType
@@ -271,7 +280,7 @@ Link:
       uri: https://www.w3.org/ns/activitystreams#name
       container:
         type: !Language
-        tag: summaryMap
+        tag: nameMap
       doc: |
         A simple, human-readable, plain-text name for the object.
         HTML markup **must not** be included. The name may be expressed using multiple language-tagged values.
@@ -929,5 +938,6 @@ Tombstone:
     deleted:
       uri: https://www.w3.org/ns/activitystreams#deleted
       type: xsd::DateTime
+      kind: !Functional
       doc: |
         On a [Tombstone] object, the [Tombstone::deleted] property is a timestamp for when the object was deleted.

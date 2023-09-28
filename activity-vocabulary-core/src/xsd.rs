@@ -41,8 +41,8 @@ impl<'de> Deserialize<'de> for DateTime {
     where
         D: serde::Deserializer<'de>,
     {
-        let src: &str = <&str as Deserialize>::deserialize(deserializer)?;
-        Self::from_str(src).map_err(serde::de::Error::custom)
+        let src: String = <String as Deserialize>::deserialize(deserializer)?;
+        Self::from_str(&src).map_err(serde::de::Error::custom)
     }
 }
 
@@ -88,7 +88,7 @@ pub struct Duration {
 
 impl Display for Duration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_char('-')?;
+        f.write_char('P')?;
         if self.negative {
             f.write_char('-')?;
         }
@@ -102,6 +102,7 @@ impl Display for Duration {
             f.write_fmt(format_args!("{}D", self.days))?;
         }
         if !self.duration.num_seconds() != 0 {
+            f.write_char('T')?;
             if self.duration.num_hours() != 0 {
                 f.write_fmt(format_args!("{}H", self.duration.num_hours()))?;
             }
@@ -116,6 +117,18 @@ impl Display for Duration {
     }
 }
 
+fn parse_duration_time_section(src: &str) -> IResult<&str, (i64, i64, i64)> {
+    let (src, _) = tag("T")(src)?;
+    let (src, hours) = opt(tuple((i64, tag("H"))))(src)?;
+    let hours = hours.map(|(n, _)| n).unwrap_or(0);
+    let (src, minutes) = opt(tuple((i64, tag("M"))))(src)?;
+    let minutes = minutes.map(|(n, _)| n).unwrap_or(0);
+    let (src, seconds) = opt(tuple((i64, tag("S"))))(src)?;
+    let seconds = seconds.map(|(n, _)| n).unwrap_or(0);
+    let (src, _) = eof(src)?;
+    Ok((src, (hours, minutes, seconds)))
+}
+
 fn parse_duration(src: &str) -> IResult<&str, Duration> {
     let (src, _) = tag("P")(src)?;
     let (src, negative) = opt(tag("-"))(src)?;
@@ -125,13 +138,9 @@ fn parse_duration(src: &str) -> IResult<&str, Duration> {
     let months = months.map(|(n, _)| n).unwrap_or(0);
     let (src, days) = opt(tuple((u64, tag("D"))))(src)?;
     let days = days.map(|(n, _)| n).unwrap_or(0);
-    let (src, hours) = opt(tuple((i64, tag("H"))))(src)?;
-    let hours = hours.map(|(n, _)| n).unwrap_or(0);
-    let (src, minutes) = opt(tuple((i64, tag("M"))))(src)?;
-    let minutes = minutes.map(|(n, _)| n).unwrap_or(0);
-    let (src, seconds) = opt(tuple((i64, tag("S"))))(src)?;
-    let seconds = seconds.map(|(n, _)| n).unwrap_or(0);
-    let (src, _) = eof(src)?;
+    let (src, (hours, minutes, seconds)) = parse_duration_time_section(src)?;
+    let (_, _) = eof(src)?;
+
     Ok((
         src,
         Duration {

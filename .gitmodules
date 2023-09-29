@@ -1,0 +1,3 @@
+[submodule "activity-vocabulary/activitystreams"]
+	path = activity-vocabulary/activitystreams
+	url = https://github.com/w3c/activitystreams

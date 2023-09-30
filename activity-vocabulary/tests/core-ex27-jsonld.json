@@ -28,7 +28,7 @@
         "attributedTo": "http://example.org/#eric",
         "content": "Remember... all I'm offering is the trooth. Nothing more."
       },
-      "published": "2015-01-01T00:00:00+00:00"
+      "published": "2015-01-01T00:00:00Z"
     },
     {
       "id": "http://example.org/activity/20150101000059",
@@ -41,7 +41,7 @@
       "actor": "http://example.org/#eric",
       "summary": "Eric deleted a note.",
       "object": "http://example.org/entry/20150101000059",
-      "published": "2015-01-01T01:01:01+00:00"
+      "published": "2015-01-01T01:01:01Z"
     }
   ]
 }

@@ -306,10 +306,6 @@ fn gen_serialize_impl(
     })
 }
 
-fn aux_container_name(name: &str) -> String {
-    format!("__container_{name}")
-}
-
 fn gen_label_deserialize_helper(map: HashMap<String, String>) -> TokenStream {
     let labels = map
         .values()
@@ -430,13 +426,11 @@ fn gen_label_deserialize_helper_for_struct(
                     let tag = tag.as_ref().unwrap_or(name);
                     let default = aka
                         .iter()
+                        .chain(container_aka)
+                        .chain(std::iter::once(container_tag))
                         .chain(std::iter::once(tag))
                         .map(|tag| (tag.to_owned(), name.to_owned()));
-                    let per_lang = container_aka
-                        .iter()
-                        .chain(std::iter::once(container_tag))
-                        .map(|tag| (tag.to_owned(), aux_container_name(name)));
-                    default.chain(per_lang).collect::<Vec<_>>()
+                    default.collect::<Vec<_>>()
                 }
             })
             .collect(),
@@ -452,13 +446,9 @@ fn gen_field_placeholder_for_struct(name: &str, def: &PropertyDef) -> anyhow::Re
                 let mut #name_ident = Option::<#ty>::None;
             })
         }
-        PropertyDef::LangContainer { .. } => {
-            let per_lang_ident = ident(&aux_container_name(name));
-            Ok(quote! {
-                let mut #name_ident = None;
-                let mut #per_lang_ident = None;
-            })
-        }
+        PropertyDef::LangContainer { .. } => Ok(quote! {
+            let mut #name_ident = ::activity_vocabulary_core::LangContainer::default();
+        }),
     }
 }
 
@@ -499,31 +489,28 @@ fn gen_deserialize_match_arm_for_struct(
     name: &str,
     def: &PropertyDef,
 ) -> anyhow::Result<TokenStream> {
+    let ty = def.gen_type()?;
     match def {
-        PropertyDef::Simple {
-            property_type,
-            kind,
-            ..
-        } => {
-            let ty = syn::parse_str(property_type)?;
-            let ty = kind.wrap_type(ty);
+        PropertyDef::Simple { kind, .. } => {
             Ok(gen_insert_deserialized_field(ident(name), ty, name, kind))
         }
-        PropertyDef::LangContainer {
-            property_type,
-            kind,
-            ..
-        } => {
-            let ty = syn::parse_str(property_type)?;
-            let ty = kind.wrap_type(ty);
-            let default = gen_insert_deserialized_field(ident(name), ty.clone(), name, kind);
-            let per_lang = gen_insert_deserialized_field(
-                ident(&aux_container_name(name)),
-                syn::parse2(quote!(::std::collections::HashMap<String, #ty>)).unwrap(),
-                name,
-                kind,
-            );
-            Ok(quote! {#default #per_lang})
+        PropertyDef::LangContainer { kind, .. } => {
+            let name = ident(name);
+            if kind == &PropertyKind::Required {
+                Ok(quote!(
+                    __Label::#name => {
+                        let value = __map.next_value::<#ty>()?;
+                        #name.deep_merge(value);
+                    }
+                ))
+            } else {
+                Ok(quote!(
+                    __Label::#name => {
+                        let value = __map.next_value::<#ty>()?;
+                        #name.merge(value);
+                    }
+                ))
+            }
         }
     }
 }
@@ -543,27 +530,13 @@ fn gen_build_field(name: &str, def: &PropertyDef) -> anyhow::Result<TokenStream>
             }
         }
         PropertyDef::LangContainer { kind, .. } => {
-            let per_lang_ident = ident(&aux_container_name(name));
             if kind == &PropertyKind::Required {
                 Ok(quote! {
-                    #name_ident: {
-                        if #name_ident.is_none() && #per_lang_ident.is_empty() {
-                            return Err(::serde::de::Error::missing_field(#name));
-                        }
-                        else {
-                            ::activity_vocabulary_core::LangContainer {
-                                default: #name_ident,
-                                per_lang: #per_lang_ident.unwrap_or_default(),
-                            }
-                        }
-                    }
+                    #name_ident: #name_ident
                 })
             } else {
                 Ok(quote! {
-                    #name_ident: ::activity_vocabulary_core::LangContainer {
-                        default: #name_ident,
-                        per_lang: #per_lang_ident.unwrap_or_default(),
-                    }
+                    #name_ident: #name_ident
                 })
             }
         }

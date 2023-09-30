@@ -198,6 +198,7 @@ Object:
 
     media_type: !Simple
       type: String
+      tag: mediaType
       uri: https://www.w3.org/ns/activitystreams#mediaType
       kind: !Functional
       doc: |

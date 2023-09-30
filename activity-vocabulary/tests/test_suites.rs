@@ -41,7 +41,7 @@ fn core_ex1() {
 fn core_ex2() {
     check::<WithContext<Add>, _>(
         "activitystreams/test/core-ex2-jsonld.json",
-        "tests/core-ex2-jsonld.json",
+        "activitystreams/test/core-ex2-jsonld.json",
     )
     .unwrap();
 }
@@ -59,7 +59,7 @@ fn core_ex3() {
 fn core_ex4() {
     check::<WithContext<Person>, _>(
         "activitystreams/test/core-ex4-jsonld.json",
-        "tests/core-ex4-jsonld.json",
+        "activitystreams/test/core-ex4-jsonld.json",
     )
     .unwrap();
 }
@@ -186,7 +186,7 @@ fn core_ex19() {
 fn core_ex20() {
     check::<WithContext<Create>, _>(
         "activitystreams/test/core-ex20-jsonld.json",
-        "tests/core-ex20-jsonld.json",
+        "activitystreams/test/core-ex20-jsonld.json",
     )
     .unwrap();
 }
@@ -241,6 +241,228 @@ fn core_ex27() {
     check::<WithContext<Collection>, _>(
         "activitystreams/test/core-ex27-jsonld.json",
         "tests/core-ex27-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0001() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/simple0001.json",
+        "activitystreams/test/simple0001.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0002() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/simple0002.json",
+        "activitystreams/test/simple0002.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0003() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/simple0003.json",
+        "activitystreams/test/simple0003.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0004() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/simple0004.json",
+        "activitystreams/test/simple0004.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0005() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/simple0005.json",
+        "tests/simple0005.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0006() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/simple0006.json",
+        "tests/simple0006.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0007() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/simple0007.json",
+        "tests/simple0007.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0008() {
+    check::<WithContext<Note>, _>(
+        "activitystreams/test/simple0008.json",
+        "activitystreams/test/simple0008.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0009() {
+    check::<WithContext<Note>, _>(
+        "activitystreams/test/simple0009.json",
+        "activitystreams/test/simple0009.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0010() {
+    check::<WithContext<Note>, _>(
+        "activitystreams/test/simple0010.json",
+        "activitystreams/test/simple0010.json",
+    )
+    .unwrap();
+}
+#[test]
+fn simple0011() {
+    check::<WithContext<Note>, _>(
+        "activitystreams/test/simple0011.json",
+        "tests/simple0011.json",
+    )
+    .unwrap();
+}
+#[test]
+fn simple0012() {
+    check::<WithContext<Note>, _>(
+        "activitystreams/test/simple0012.json",
+        "tests/simple0012.json",
+    )
+    .unwrap();
+}
+#[test]
+fn simple0013() {
+    check::<WithContext<Note>, _>(
+        "activitystreams/test/simple0013.json",
+        "activitystreams/test/simple0013.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0014() {
+    check::<WithContext<Note>, _>(
+        "activitystreams/test/simple0014.json",
+        "activitystreams/test/simple0014.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0015() {
+    check::<WithContext<Note>, _>(
+        "activitystreams/test/simple0015.json",
+        "activitystreams/test/simple0015.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0016() {
+    check::<WithContext<Like>, _>(
+        "activitystreams/test/simple0016.json",
+        "activitystreams/test/simple0016.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0017() {
+    check::<WithContext<Like>, _>(
+        "activitystreams/test/simple0017.json",
+        "activitystreams/test/simple0017.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0018() {
+    check::<WithContext<Like>, _>(
+        "activitystreams/test/simple0018.json",
+        "activitystreams/test/simple0018.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0019() {
+    check::<WithContext<Like>, _>(
+        "activitystreams/test/simple0019.json",
+        "activitystreams/test/simple0019.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0020() {
+    check::<WithContext<Like>, _>(
+        "activitystreams/test/simple0020.json",
+        "activitystreams/test/simple0020.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0021() {
+    check::<WithContext<Like>, _>(
+        "activitystreams/test/simple0021.json",
+        "tests/simple0021.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0022() {
+    check::<WithContext<Like>, _>(
+        "activitystreams/test/simple0022.json",
+        "activitystreams/test/simple0022.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0023() {
+    check::<WithContext<Undo>, _>(
+        "activitystreams/test/simple0023.json",
+        "tests/simple0023.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0024() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/simple0024.json",
+        "tests/simple0024.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn simple0025() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/simple0025.json",
+        "tests/simple0025.json",
     )
     .unwrap();
 }

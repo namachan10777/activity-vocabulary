@@ -5,7 +5,7 @@
   "totalItems": 1,
   "items": {
     "type": "Add",
-    "published": "2011-02-10T15:04:55+00:00",
+    "published": "2011-02-10T15:04:55Z",
     "generator": "http://example.org/activities-app",
     "nameMap": {
       "en": "Martin added a new image to his album.",

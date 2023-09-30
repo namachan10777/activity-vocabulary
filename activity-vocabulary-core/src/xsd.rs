@@ -1,5 +1,4 @@
 use std::{
-    collections::HashMap,
     fmt::{Display, Write},
     str::FromStr,
 };
@@ -14,8 +13,6 @@ use nom::{
 };
 use serde::{Deserialize, Serialize};
 
-pub type LangContainer<T> = HashMap<String, T>;
-
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum DateTime {
     Naive(chrono::NaiveDateTime),
@@ -27,11 +24,17 @@ impl FromStr for DateTime {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if let Ok(with_offset) = chrono::DateTime::<FixedOffset>::parse_from_rfc3339(s) {
             Ok(Self::WithOffset(with_offset))
+        } else if let Ok(datetime) =
+            chrono::NaiveDateTime::parse_from_str(s, "%Y-%m-%dT%H:%M:%S%.f")
+        {
+            Ok(Self::Naive(datetime))
+        } else if let Ok(datetime) = chrono::NaiveDateTime::parse_from_str(s, "%Y-%m-%dT%H:%M") {
+            Ok(Self::Naive(datetime))
+        } else if let Ok(datetime) = chrono::DateTime::parse_from_str(s, "%Y-%m-%dT%H:%M%:z") {
+            Ok(Self::WithOffset(datetime))
         } else {
-            Ok(Self::Naive(chrono::NaiveDateTime::parse_from_str(
-                s,
-                "%Y-%m-%dT%H:%M:%S%.f",
-            )?))
+            let datetime = chrono::NaiveDateTime::parse_from_str(s, "%Y-%m-%dT%H:%MZ")?;
+            Ok(Self::WithOffset(datetime.and_utc().fixed_offset()))
         }
     }
 }
@@ -62,7 +65,7 @@ impl Display for DateTime {
                 ))
             }
             Self::WithOffset(datetime) => {
-                f.write_str(&datetime.to_rfc3339_opts(chrono::SecondsFormat::Secs, false))
+                f.write_str(&datetime.to_rfc3339_opts(chrono::SecondsFormat::Secs, true))
             }
         }
     }

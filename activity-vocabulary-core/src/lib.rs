@@ -191,6 +191,59 @@ pub struct LangContainer<T> {
     pub per_lang: HashMap<String, T>,
 }
 
+impl<'de, T: Deserialize<'de>> Deserialize<'de> for LangContainer<T> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value = serde_value::Value::deserialize(deserializer)?;
+        let deserializer = serde_value::ValueDeserializer::<D::Error>::new(value.clone());
+        match T::deserialize(deserializer) {
+            Ok(inline) => Ok(Self {
+                default: Some(inline),
+                per_lang: Default::default(),
+            }),
+            Err(inline_err) => {
+                HashMap::<String, T>::deserialize(serde_value::ValueDeserializer::new(value))
+                    .map_err(|e: D::Error| serde::de::Error::custom(format!("{inline_err} & {e}")))
+                    .map(|per_lang| Self {
+                        default: Default::default(),
+                        per_lang,
+                    })
+            }
+        }
+    }
+}
+
+impl<T> LangContainer<T> {
+    pub fn merge(&mut self, other: Self) {
+        match (&mut self.default, other.default) {
+            (Some(x), Some(y)) => *x = y,
+            (None, Some(y)) => self.default = Some(y),
+            (_, None) => (),
+        }
+        self.per_lang.extend(other.per_lang)
+    }
+}
+
+impl<T: MergeableProperty> LangContainer<T> {
+    pub fn deep_merge(&mut self, other: Self) {
+        match (&mut self.default, other.default) {
+            (Some(x), Some(y)) => x.merge(y),
+            (None, Some(y)) => self.default = Some(y),
+            (_, None) => (),
+        }
+        for (k, v) in other.per_lang {
+            match &mut self.per_lang.get_mut(&k) {
+                Some(occupied) => occupied.merge(v),
+                None => {
+                    self.per_lang.insert(k, v);
+                }
+            }
+        }
+    }
+}
+
 pub trait MergeableProperty {
     fn merge(&mut self, other: Self);
 }

@@ -19,5 +19,6 @@ serde-value = "0.7.0"
 url = { workspace = true, features = ["serde"] }
 
 [dev-dependencies]
+anyhow.workspace = true
 diff = "0.1.13"
 serde_json.workspace = true

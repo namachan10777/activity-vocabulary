@@ -8,6 +8,7 @@ version = "0.0.2"
 dependencies = [
  "activity-vocabulary-core",
  "activity-vocabulary-derive",
+ "anyhow",
  "diff",
  "serde",
  "serde-value",

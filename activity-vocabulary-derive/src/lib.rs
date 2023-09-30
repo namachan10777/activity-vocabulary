@@ -46,6 +46,22 @@ pub enum PropertyDef {
     },
 }
 
+impl PropertyDef {
+    fn uri(&self) -> &str {
+        match self {
+            PropertyDef::Simple { uri, .. } => &uri,
+            PropertyDef::LangContainer { uri, .. } => &uri,
+        }
+    }
+
+    fn doc(&self) -> &str {
+        match self {
+            PropertyDef::Simple { doc, .. } => &doc,
+            PropertyDef::LangContainer { doc, .. } => &doc,
+        }
+    }
+}
+
 #[derive(Deserialize, Clone)]
 pub enum PreferredPropertyName {
     Simple(String),
@@ -234,13 +250,29 @@ fn gen_type(
         .map(|(name, def)| {
             let ty = def.gen_type()?;
             let name = ident(name);
-            Ok(quote!(pub #name: #ty, ))
+            let doc_uri = format!("`{}`", def.uri());
+            let doc_body = def.doc();
+            Ok(quote!(
+                #[doc = #doc_uri]
+                #[doc = ""]
+                #[doc = #doc_body]
+                pub #name: #ty,
+            ))
         })
         .collect::<anyhow::Result<TokenStream>>()?;
     let type_name = ident(type_name);
+    let doc_uri = format!("`{}`", &type_def.uri);
+    let doc_body = &type_def.doc;
+    let doc = quote!(
+        #[doc = #doc_uri]
+        #[doc = ""]
+        #[doc = #doc_body]
+    );
     Ok(quote! {
         #[derive(Debug, Clone, PartialEq)]
+        #[derive(::typed_builder::TypedBuilder)]
         #[allow(clippy::type_complexity)]
+        #doc
         pub struct #type_name {
             #properties
         }

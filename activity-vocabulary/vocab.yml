@@ -226,7 +226,7 @@ Link:
     Many of the properties defined by the Activity Vocabulary allow values that are either instances of [ObjectSubtypes] or [LinkSubtypes].
     When a [Link] is used,
     it establishes a [qualified relation](https://patterns.dataincubator.org/book/qualified-relation.html)
-    connecting the subject (the containing object) to the resource identified by the [Link::].
+    connecting the subject (the containing object) to the resource identified by the [Link::href].
     Properties of the [Link] are properties of the reference as opposed to properties of the resource.
   properties:
     link_type: !Simple

@@ -11,13 +11,13 @@ name = "activity-vocabulary"
 
 [build-dependencies]
 activity-vocabulary-derive = { path = "../activity-vocabulary-derive" }
-serde_yaml = "0.9.25"
+serde_yaml = "0.9"
 
 [dependencies]
 activity-vocabulary-core = { path = "../activity-vocabulary-core" }
 serde = { workspace = true, features = ["derive"] }
-serde-value = "0.7.0"
-typed-builder = "0.16.2"
+serde-value.workspace = true
+typed-builder = "0.16"
 url = { workspace = true, features = ["serde"] }
 
 [dev-dependencies]

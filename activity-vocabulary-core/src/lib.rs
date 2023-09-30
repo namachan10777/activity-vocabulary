@@ -223,7 +223,7 @@ impl<T: MergeableProperty> MergeableProperty for Option<T> {
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct Context {
     urls: Vec<url::Url>,
-    inline: HashMap<String, String>,
+    inline: HashMap<String, serde_json::Value>,
 }
 
 impl Serialize for Context {
@@ -252,7 +252,7 @@ impl Serialize for Context {
 
 enum ContextArrayElement {
     Url(url::Url),
-    Inline(HashMap<String, String>),
+    Inline(HashMap<String, serde_json::Value>),
 }
 
 struct ContextArrayElementVisitor;
@@ -267,7 +267,7 @@ impl<'de> Visitor<'de> for ContextArrayElementVisitor {
         A: serde::de::MapAccess<'de>,
     {
         let mut r = HashMap::new();
-        while let Some((k, v)) = map.next_entry::<String, String>()? {
+        while let Some((k, v)) = map.next_entry::<String, serde_json::Value>()? {
             r.insert(k, v);
         }
         Ok(ContextArrayElement::Inline(r))
@@ -381,7 +381,7 @@ impl<T> TaggedContentVisitor<T> {
     }
 }
 
-impl<'de, T: Deserialize<'de> + Debug> Visitor<'de> for TaggedContentVisitor<T> {
+impl<'de, T: Deserialize<'de> + Debug + Default> Visitor<'de> for TaggedContentVisitor<T> {
     type Value = (T, serde_value::Value);
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -395,17 +395,15 @@ impl<'de, T: Deserialize<'de> + Debug> Visitor<'de> for TaggedContentVisitor<T> 
         let mut content = BTreeMap::new();
         let mut tag = None;
         while let Some((k, v)) = map.next_entry::<serde_value::Value, serde_value::Value>()? {
-            if let serde_value::Value::String(k_str) = &k {
-                if k_str == self.tag {
-                    let deserializer = serde_value::ValueDeserializer::new(v.clone());
-                    tag = Some(T::deserialize(deserializer)?);
+            if let serde_value::Value::String(label) = &k {
+                if label == self.tag {
+                    tag = Some(T::deserialize(serde_value::ValueDeserializer::new(
+                        v.clone(),
+                    ))?)
                 }
             }
             content.insert(k, v);
         }
-        Ok((
-            tag.ok_or_else(|| serde::de::Error::missing_field(self.tag))?,
-            serde_value::Value::Map(content),
-        ))
+        Ok((tag.unwrap_or_default(), serde_value::Value::Map(content)))
     }
 }

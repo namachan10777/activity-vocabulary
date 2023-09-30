@@ -13,7 +13,6 @@ Object:
       tag: type
       uri: "@type"
       doc: Kind of [ObjectSubtypes]
-      kind: !Required
 
     id: !Simple
       type: url::Url
@@ -22,14 +21,14 @@ Object:
       kind: !Functional
 
     attachment: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#attributedTo
       doc: |
         Identifies a resource attached or related to an object that potentially requires special handling.
         The intent is to provide a model that is at least semantically similar to attachments in email.
 
     attributed_to: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       tag: attributedTo
       uri: https://www.w3.org/ns/activitystreams#attributedTo
       doc: |
@@ -37,7 +36,7 @@ Object:
         The attributed entities might not be Actors. For instance, an object might be attributed to the completion of another activity.
 
     audience: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#audience
       doc: |
         Identifies one or more entities that represent the total population of entities
@@ -55,7 +54,7 @@ Object:
         The content may be expressed using multiple language-tagged values.
 
     context: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#context
       doc: |
         Identifies the context within which the object exists or an activity was performed.
@@ -82,7 +81,7 @@ Object:
         for instance, the [Activity::end_time] property specifies the moment the activity concluded or is expected to conclude.
 
     generator: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#generator
       doc: |
         Identifies the entity (e.g. an application) that generated the object.
@@ -94,7 +93,7 @@ Object:
       doc: The date and time at which the object was published
 
     icon: !Simple
-      type: Or<Remotable<ImageSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#icon
       doc: |
         Indicates an entity that describes an icon for this object.
@@ -102,26 +101,26 @@ Object:
         should be suitable for presentation at a small size.
 
     image: !Simple
-      type: Or<Remotable<ImageSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#image
       doc: |
         Indicates an entity that describes an image for this object.
         Unlike the icon property, there are no aspect ratio or display size limitations assumed.
 
     in_reply_to: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#inReplyTo
       doc: |
         Indicates one or more entities for which this object is considered a response.
 
     location: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#location
       doc: |
         Indicates one or more physical or logical locations associated with the object.
 
     preview: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#preview
       doc: |
         Identifies an entity that provides a preview of this object.
@@ -152,7 +151,7 @@ Object:
         Multiple language tagged summaries **may** be provided.
 
     tag: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#tag
       doc: |
         One or more "tags" that have been associated with an objects.
@@ -174,25 +173,25 @@ Object:
         Identifies one or more links to representations of the object
 
     to: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#to
       doc: |
         Identifies an entity considered to be part of the public primary audience of an Object
 
     bto: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#bto
       doc: |
         Identifies an Object that is part of the private primary audience of this Object.
 
     cc: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#cc
       doc: |
         Identifies an Object that is part of the public secondary audience of this Object.
 
     bcc: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#bcc
       doc: |
         Identifies one or more Objects that are part of the private secondary audience of this Object.
@@ -226,14 +225,13 @@ Link:
     Many of the properties defined by the Activity Vocabulary allow values that are either instances of [ObjectSubtypes] or [LinkSubtypes].
     When a [Link] is used,
     it establishes a [qualified relation](https://patterns.dataincubator.org/book/qualified-relation.html)
-    connecting the subject (the containing object) to the resource identified by the [Link::href].
+    connecting the subject (the containing object) to the resource identified by the [Link::].
     Properties of the [Link] are properties of the reference as opposed to properties of the resource.
   properties:
     link_type: !Simple
       type: String
       tag: type
       uri: "@type"
-      kind: !Required
       doc: Kind of [LinkSubtypes]
 
     href: !Simple
@@ -298,7 +296,7 @@ Link:
         On a [Link], specifies a hint as to the rendering width in device-independent pixels of the linked resource.
 
     preview: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#preview
       doc: |
         Identifies an entity that provides a preview of this object.
@@ -314,21 +312,21 @@ Activity:
     It is important to note that the [Activity] type itself does not carry any specific semantics about the kind of action being taken.
   properties:
     actor: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#actor
       doc: |
         Describes one or more entities that either performed or are expected to perform the activity.
         Any single activity can have multiple [Activity::actor]s. The [Activity::actor] may be specified using an indirect [Link].
 
     object: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#object
       doc: |
         Describes the direct object of the activity.
         For instance, in the activity `John added a movie to his wishlist`, the object of the activity is the movie added.
 
     target: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#target
       doc: |
         Describes the indirect object, or target, of the activity.
@@ -337,7 +335,7 @@ Activity:
         An activity can have more than one target.
 
     result: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#result
       doc: |
         Describes the result of the activity. For instance,
@@ -345,7 +343,7 @@ Activity:
         the result property can be used to describe that new resource.
 
     origin: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#origin
       doc: |
         Describes an indirect object of the activity from which the activity is directed.
@@ -353,7 +351,7 @@ Activity:
         in the activity "John moved an item to List B from List A", the origin of the activity is "List A".
 
     instrument: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#instrument
       doc: |
         Identifies one or more objects used (or to be used) in the completion of an [Activity].
@@ -387,7 +385,7 @@ Collection:
       kind: !Functional
 
     items: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#items
       aka:
         - orderedItems
@@ -776,7 +774,7 @@ Relationship:
         For instance, for a [Relationship] object describing `John is related to Sally`, [Relationship::subject] would refer to `John`.
 
     object: !Simple
-      type: Or<Remotable<ObjectSubtypes>, LinkSubtypes>
+      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#object
       doc: |
         Describes the entity to which the [Relationship::subject] is related.

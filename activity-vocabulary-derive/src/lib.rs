@@ -344,6 +344,12 @@ fn gen_label_deserialize_helper(map: HashMap<String, String>) -> TokenStream {
         #[derive(Debug)]
         enum __Label { #labels __Ignore(String) }
 
+        impl Default for __Label {
+            fn default() -> Self {
+                Self::__Ignore(Default::default())
+            }
+        }
+
         struct __LabelVisitor;
 
         impl<'de> ::serde::de::Visitor<'de> for __LabelVisitor {
@@ -372,6 +378,21 @@ fn gen_label_deserialize_helper(map: HashMap<String, String>) -> TokenStream {
                     value => Ok(__Label::__Ignore(String::from_utf8_lossy(value).to_string()))
                 }
             }
+
+            fn visit_seq<A: serde::de::SeqAccess<'de>>(
+                self,
+                mut value: A
+            ) -> Result<Self::Value, A::Error> {
+                loop {
+                    match value.next_element::<__Label>() {
+                        Ok(Some(__Label::__Ignore(_))) => continue,
+                        Ok(Some(x)) => return Ok(x),
+                        Ok(None) => break,
+                        Err(_) => continue,
+                    }
+                }
+                Ok(__Label::__Ignore(Default::default()))
+            }
         }
 
         impl<'de> ::serde::Deserialize<'de> for __Label {
@@ -379,7 +400,7 @@ fn gen_label_deserialize_helper(map: HashMap<String, String>) -> TokenStream {
             where
                 D: ::serde::Deserializer<'de>,
             {
-                deserializer.deserialize_identifier(__LabelVisitor)
+                deserializer.deserialize_any(__LabelVisitor)
             }
         }
     }
@@ -590,7 +611,6 @@ fn gen_impl_visitor_for_struct(
             {
                 #field_placeholders
                 while let Some(__key) = __map.next_key::<__Label>()? {
-                    dbg!(&__key);
                     match __key {
                         #deserialize_match_arms
                         __Label::__Ignore(_) => {
@@ -810,6 +830,7 @@ fn gen_subtypes_deserialize(
     type_def: &TypeDef,
     full_defs: &HashMap<String, TypeDef>,
 ) -> anyhow::Result<TokenStream> {
+    let base_ident = ident(type_name);
     let subtype_ident = ident(&format!("{type_name}Subtypes"));
     let subtypes = collect_subtypes(type_name, type_def, full_defs)?;
     let label_helper = gen_label_deserialize_helper(
@@ -847,7 +868,14 @@ fn gen_subtypes_deserialize(
                     let deserializer = ::serde_value::ValueDeserializer::new(content);
                     match tag {
                         #arms
-                        __Label::__Ignore(name) => Err(::serde::de::Error::invalid_type(::serde::de::Unexpected::Str(&name), &#expected))
+                        __Label::__Ignore(name) => {
+                            if let Ok(object) = #base_ident::deserialize(deserializer) {
+                                Ok(#subtype_ident::#base_ident(object))
+                            }
+                            else {
+                                Err(::serde::de::Error::invalid_type(::serde::de::Unexpected::Str(&name), &#expected))
+                            }
+                        }
                     }
                 }
             }

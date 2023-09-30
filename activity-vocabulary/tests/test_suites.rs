@@ -64,11 +64,183 @@ fn core_ex4() {
     .unwrap();
 }
 
+/// Custom field is unsupported
 #[test]
 fn core_ex6() {
-    check::<WithContext<Person>, _>(
+    check::<WithContext<Place>, _>(
         "activitystreams/test/core-ex6-jsonld.json",
-        "activitystreams/test/core-ex6-jsonld.json",
+        "tests/core-ex6-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex7() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/core-ex7-jsonld.json",
+        "activitystreams/test/core-ex7-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex8() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/core-ex8-jsonld.json",
+        "activitystreams/test/core-ex8-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex11b() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/core-ex11b-jsonld.json",
+        "activitystreams/test/core-ex11b-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex11c() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/core-ex11c-jsonld.json",
+        "activitystreams/test/core-ex11c-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex11e() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/core-ex11e-jsonld.json",
+        "activitystreams/test/core-ex11e-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex11f() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/core-ex11f-jsonld.json",
+        "activitystreams/test/core-ex11f-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex12() {
+    check::<WithContext<Application>, _>(
+        "activitystreams/test/core-ex12-jsonld.json",
+        "activitystreams/test/core-ex12-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex13() {
+    check::<WithContext<Application>, _>(
+        "activitystreams/test/core-ex13-jsonld.json",
+        "activitystreams/test/core-ex13-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex14() {
+    check::<WithContext<Application>, _>(
+        "activitystreams/test/core-ex14-jsonld.json",
+        "activitystreams/test/core-ex14-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex15() {
+    check::<WithContext<Application>, _>(
+        "activitystreams/test/core-ex15-jsonld.json",
+        "activitystreams/test/core-ex15-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex17() {
+    check::<WithContext<Create>, _>(
+        "activitystreams/test/core-ex17-jsonld.json",
+        "tests/core-ex17-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex19() {
+    check::<WithContext<Create>, _>(
+        "activitystreams/test/core-ex19-jsonld.json",
+        "tests/core-ex19-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex20() {
+    check::<WithContext<Create>, _>(
+        "activitystreams/test/core-ex20-jsonld.json",
+        "tests/core-ex20-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex21() {
+    check::<WithContext<Collection>, _>(
+        "activitystreams/test/core-ex21-jsonld.json",
+        "activitystreams/test/core-ex21-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex21b() {
+    check::<WithContext<Collection>, _>(
+        "activitystreams/test/core-ex21b-jsonld.json",
+        "tests/core-ex21b-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex22() {
+    check::<WithContext<OrderedCollection>, _>(
+        "activitystreams/test/core-ex22-jsonld.json",
+        "activitystreams/test/core-ex22-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex23() {
+    check::<WithContext<Place>, _>(
+        "activitystreams/test/core-ex23-jsonld.json",
+        "activitystreams/test/core-ex23-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex24() {
+    check::<WithContext<Object>, _>(
+        "activitystreams/test/core-ex24-jsonld.json",
+        "tests/core-ex24-jsonld.json",
+    )
+    .unwrap();
+}
+
+#[test]
+fn core_ex27() {
+    check::<WithContext<Collection>, _>(
+        "activitystreams/test/core-ex27-jsonld.json",
+        "tests/core-ex27-jsonld.json",
     )
     .unwrap();
 }

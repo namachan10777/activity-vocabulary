@@ -1,0 +1,8 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/activitystreams",
+    { "gsp": "http://www.opengis.net/ont/geosparql" }
+  ],
+  "summary": "A polygon",
+  "type": "gsp:Geometry"
+}

@@ -1,3 +1,4 @@
+#![allow(clippy::type_complexity, clippy::redundant_field_names)]
 use std::{fmt::Display, str::FromStr};
 
 use activity_vocabulary_core::*;

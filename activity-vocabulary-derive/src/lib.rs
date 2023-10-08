@@ -49,15 +49,15 @@ pub enum PropertyDef {
 impl PropertyDef {
     fn uri(&self) -> &str {
         match self {
-            PropertyDef::Simple { uri, .. } => &uri,
-            PropertyDef::LangContainer { uri, .. } => &uri,
+            PropertyDef::Simple { uri, .. } => uri,
+            PropertyDef::LangContainer { uri, .. } => uri,
         }
     }
 
     fn doc(&self) -> &str {
         match self {
-            PropertyDef::Simple { doc, .. } => &doc,
-            PropertyDef::LangContainer { doc, .. } => &doc,
+            PropertyDef::Simple { doc, .. } => doc,
+            PropertyDef::LangContainer { doc, .. } => doc,
         }
     }
 }
@@ -256,6 +256,7 @@ fn gen_type(
                 #[doc = #doc_uri]
                 #[doc = ""]
                 #[doc = #doc_body]
+                #[allow(clippy::type_complexity)]
                 pub #name: #ty,
             ))
         })
@@ -271,8 +272,8 @@ fn gen_type(
     Ok(quote! {
         #[derive(Debug, Clone, PartialEq)]
         #[derive(::typed_builder::TypedBuilder)]
-        #[allow(clippy::type_complexity)]
         #doc
+        #[allow(clippy::type_complexity)]
         pub struct #type_name {
             #properties
         }
@@ -561,17 +562,9 @@ fn gen_build_field(name: &str, def: &PropertyDef) -> anyhow::Result<TokenStream>
                 })
             }
         }
-        PropertyDef::LangContainer { kind, .. } => {
-            if kind == &PropertyKind::Required {
-                Ok(quote! {
-                    #name_ident: #name_ident
-                })
-            } else {
-                Ok(quote! {
-                    #name_ident: #name_ident
-                })
-            }
-        }
+        PropertyDef::LangContainer { .. } => Ok(quote! {
+            #name_ident: #name_ident
+        }),
     }
 }
 
@@ -607,6 +600,7 @@ fn gen_impl_visitor_for_struct(
                 formatter.write_str("field identifier")
             }
 
+            #[allow(clippy::redundant_field_names)]
             fn visit_map<A>(
                 self,
                 mut __map: A,

@@ -11,7 +11,7 @@ use nom::{
     sequence::tuple,
     IResult,
 };
-use serde::{Deserialize, Serialize};
+use serde::{de::Visitor, Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum DateTime {
@@ -197,12 +197,35 @@ impl Serialize for Duration {
     }
 }
 
+struct DurationVisitor;
+
+impl<'de> Visitor<'de> for DurationVisitor {
+    type Value = Duration;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("xsd duration")
+    }
+
+    fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        v.parse().map_err(serde::de::Error::custom)
+    }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        v.parse().map_err(serde::de::Error::custom)
+    }
+}
+
 impl<'de> Deserialize<'de> for Duration {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        let s = <&str as Deserialize>::deserialize(deserializer)?;
-        s.parse().map_err(serde::de::Error::custom)
+        deserializer.deserialize_str(DurationVisitor)
     }
 }

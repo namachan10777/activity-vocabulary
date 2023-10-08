@@ -93,7 +93,7 @@ Object:
       doc: The date and time at which the object was published
 
     icon: !Simple
-      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
+      type: Or<LinkSubtypes, Remotable<ImageSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#icon
       doc: |
         Indicates an entity that describes an icon for this object.
@@ -101,7 +101,7 @@ Object:
         should be suitable for presentation at a small size.
 
     image: !Simple
-      type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
+      type: Or<LinkSubtypes, Remotable<ImageSubtypes>>
       uri: https://www.w3.org/ns/activitystreams#image
       doc: |
         Indicates an entity that describes an image for this object.
@@ -109,6 +109,7 @@ Object:
 
     in_reply_to: !Simple
       type: Or<LinkSubtypes, Remotable<ObjectSubtypes>>
+      tag: inReplyTo
       uri: https://www.w3.org/ns/activitystreams#inReplyTo
       doc: |
         Indicates one or more entities for which this object is considered a response.
@@ -394,21 +395,21 @@ Collection:
         Identifies the items contained in a collection. The items might be ordered or unordered.
 
     current: !Simple
-      type: Box<Or<Remotable<CollectionPageSubtypes>, LinkSubtypes>>
+      type: Box<Or<LinkSubtypes, Remotable<CollectionPageSubtypes>>>
       uri: https://www.w3.org/ns/activitystreams#current
       kind: !Functional
       doc: |
         In a paged [Collection], indicates the page that contains the most recently updated member items.
 
     first: !Simple
-      type: Box<Or<Remotable<CollectionPageSubtypes>, LinkSubtypes>>
+      type: Box<Or<LinkSubtypes, Remotable<CollectionPageSubtypes>>>
       uri: https://www.w3.org/ns/activitystreams#first
       kind: !Functional
       doc: |
         In a paged [Collection], indicates the furthest preceeding page of items in the collection.
 
     last: !Simple
-      type: Box<Or<Remotable<CollectionPageSubtypes>, LinkSubtypes>>
+      type: Box<Or<LinkSubtypes, Remotable<CollectionPageSubtypes>>>
       uri: https://www.w3.org/ns/activitystreams#last
       kind: !Functional
       doc: |
@@ -439,14 +440,14 @@ CollectionPage:
         Identifies the [CollectionSubtypes] to which a [CollectionPage] objects items belong.
 
     next: !Simple
-      type: Box<Or<Remotable<CollectionPageSubtypes>, LinkSubtypes>>
+      type: Box<Or<LinkSubtypes, Remotable<CollectionPageSubtypes>>>
       uri: https://www.w3.org/ns/activitystreams#next
       kind: !Functional
       doc: |
         In a paged [CollectionSubtypes], indicates the next page of items.
 
     prev: !Simple
-      type: Box<Or<Remotable<CollectionPageSubtypes>, LinkSubtypes>>
+      type: Box<Or<LinkSubtypes, Remotable<CollectionPageSubtypes>>>
       uri: https://www.w3.org/ns/activitystreams#prev
       kind: !Functional
       doc: |
@@ -782,7 +783,7 @@ Relationship:
 
     relationship: !Simple
       uri: https://www.w3.org/ns/activitystreams#relationship
-      type: Remotable<Object>
+      type: String
       doc: |
         On a [Relationship] object,
         the [Relationship::relationship] property identifies the kind of relationship that exists between [Relationship::subject] and [Relationship::object].

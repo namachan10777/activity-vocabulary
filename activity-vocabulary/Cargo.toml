@@ -6,15 +6,16 @@ keywords.workspace = true
 license.workspace = true
 homepage.workspace = true
 name = "activity-vocabulary"
+description = "Type definitions of Activity Vocabulary 2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.htmlname = "activity-vocabulary"
 
 [build-dependencies]
-activity-vocabulary-derive = { path = "../activity-vocabulary-derive" }
+activity-vocabulary-derive = "0.0.2"
 serde_yaml = "0.9"
 
 [dependencies]
-activity-vocabulary-core = { path = "../activity-vocabulary-core" }
+activity-vocabulary-core = "0.0.2"
 serde = { workspace = true, features = ["derive"] }
 serde-value.workspace = true
 typed-builder = "0.16"

@@ -2,7 +2,7 @@
 package.version = "0.0.2"
 package.edition = "2021"
 package.authors = ["Masaki Nakano <admin@namachan10777.dev>"]
-package.license = "MIR OR Apache-2.0"
+package.license = "MIT OR Apache-2.0"
 package.homepage = "https://github.com/namachan10777/activity-vocabulary"
 package.keywords = ["activitypub", "activity-vocabulary", "activity-streams"]
 package.categories = []

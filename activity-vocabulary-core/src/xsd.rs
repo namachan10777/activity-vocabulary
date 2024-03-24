@@ -59,6 +59,8 @@ impl Display for DateTime {
                 let hour = naive.hour();
                 let minute = naive.minute();
                 let second = naive.second();
+                // wait chrono v0.5
+                #[allow(deprecated)]
                 let submilli = naive.timestamp_subsec_millis();
                 f.write_fmt(format_args!(
                     "{year:04}-{month:02}-{day:02}T{hour:02}:{minute:02}:{second:02}.{submilli:04}"

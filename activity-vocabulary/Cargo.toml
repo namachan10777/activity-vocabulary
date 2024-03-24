@@ -18,7 +18,7 @@ serde_yaml = "0.9"
 activity-vocabulary-core = "0.0.2"
 serde = { workspace = true, features = ["derive"] }
 serde-value.workspace = true
-typed-builder = "0.16"
+typed-builder = "0.18"
 url = { workspace = true, features = ["serde"] }
 
 [dev-dependencies]

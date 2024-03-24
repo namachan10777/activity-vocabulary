@@ -4,10 +4,10 @@ version = 3
 
 [[package]]
 name = "activity-vocabulary"
-version = "0.0.2"
+version = "0.0.4"
 dependencies = [
- "activity-vocabulary-core 0.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "activity-vocabulary-derive 0.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "activity-vocabulary-core 0.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "activity-vocabulary-derive 0.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "anyhow",
  "diff",
  "serde",
@@ -20,7 +20,7 @@ dependencies = [
 
 [[package]]
 name = "activity-vocabulary-core"
-version = "0.0.2"
+version = "0.0.4"
 dependencies = [
  "chrono",
  "nom",
@@ -32,9 +32,9 @@ dependencies = [
 
 [[package]]
 name = "activity-vocabulary-core"
-version = "0.0.2"
+version = "0.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9793ef09ee46975e7b194f5de379a5c5ffb053c438f51e82d8d8c12d7e7bf9a5"
+checksum = "b2687d1bbd8870aea72d531044c1215e2615b98eb49047ba83e2d3c4a39768de"
 dependencies = [
  "chrono",
  "nom",
@@ -46,7 +46,7 @@ dependencies = [
 
 [[package]]
 name = "activity-vocabulary-derive"
-version = "0.0.2"
+version = "0.0.4"
 dependencies = [
  "anyhow",
  "maplit",
@@ -61,9 +61,9 @@ dependencies = [
 
 [[package]]
 name = "activity-vocabulary-derive"
-version = "0.0.2"
+version = "0.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83b640d8be41cbec8fc2a63d5d6b8ddd21b18c48b55cc323bbf17b3d755fdab1"
+checksum = "2d8885b6062f2210d0dedde3aacb3558a787a6dda4dd7fd9309fc0aec1ec788d"
 dependencies = [
  "anyhow",
  "maplit",

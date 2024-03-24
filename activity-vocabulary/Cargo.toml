@@ -11,11 +11,11 @@ description = "Type definitions of Activity Vocabulary 2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.htmlname = "activity-vocabulary"
 
 [build-dependencies]
-activity-vocabulary-derive = "0.0.4"
+activity-vocabulary-derive = "0.0.5"
 serde_yaml = "0.9"
 
 [dependencies]
-activity-vocabulary-core = "0.0.4"
+activity-vocabulary-core = "0.0.5"
 serde = { workspace = true, features = ["derive"] }
 serde-value.workspace = true
 typed-builder = "0.18"

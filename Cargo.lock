@@ -52,7 +52,6 @@ dependencies = [
  "maplit",
  "proc-macro2",
  "quote",
- "rust-format",
  "serde",
  "serde_json",
  "serde_yaml",

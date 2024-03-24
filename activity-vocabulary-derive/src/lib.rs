@@ -3,7 +3,6 @@ use std::collections::{HashMap, HashSet};
 use anyhow::{anyhow, Context};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
-use rust_format::{Formatter, RustFmt};
 use serde::Deserialize;
 use syn::{LitByteStr, LitStr, Type};
 
@@ -913,6 +912,5 @@ pub fn gen(defs: &HashMap<String, TypeDef>) -> anyhow::Result<String> {
         .iter()
         .map(|(name, def)| gen_set(name, def, defs))
         .collect::<anyhow::Result<TokenStream>>()?;
-    let src = RustFmt::new().format_tokens(src)?;
-    Ok(src)
+    Ok(src.to_string())
 }

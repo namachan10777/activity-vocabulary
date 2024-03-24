@@ -371,7 +371,10 @@ fn gen_label_deserialize_helper(map: HashMap<String, String>) -> TokenStream {
     quote! {
         #[allow(non_camel_case_types)]
         #[derive(Debug)]
-        enum __Label { #labels __Ignore(String) }
+        enum __Label {
+            #labels
+            __Ignore(#[allow(unused)] String)
+        }
 
         impl Default for __Label {
             fn default() -> Self {

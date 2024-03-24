@@ -151,6 +151,8 @@ fn parse_duration(src: &str) -> IResult<&str, Duration> {
             years,
             months,
             days,
+            // wait chrono v0.5
+            #[allow(deprecated)]
             duration: chrono::Duration::hours(hours)
                 + chrono::Duration::minutes(minutes)
                 + chrono::Duration::seconds(seconds),

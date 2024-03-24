@@ -1,5 +1,5 @@
 [workspace]
-package.version = "0.0.3"
+package.version = "0.0.4"
 package.edition = "2021"
 package.authors = ["Masaki Nakano <admin@namachan10777.dev>"]
 package.license = "MIT OR Apache-2.0"

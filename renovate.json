@@ -1,5 +1,5 @@
 {
-  "extends": ["config:base", ":timezone(Asia/Tokyo)"],
+  "extends": ["config:recommended", ":timezone(Asia/Tokyo)"],
   "labels": ["dependencies", "renovate"],
   "schedule": ["after 10pm and before 5am"],
   "dependencyDashboard": true,
@@ -15,7 +15,7 @@
   },
   "packageRules": [
     {
-      "matchUpdateTypes": ["minor", "major"],
+      "matchUpdateTypes": ["minor", "patch"],
       "matchCurrentVersion": "!/^0/",
       "automerge": true
     }

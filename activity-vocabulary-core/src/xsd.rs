@@ -122,19 +122,19 @@ impl Display for Duration {
 }
 
 fn parse_duration_time_section(src: &str) -> IResult<&str, (i64, i64, i64)> {
-    let (src, _) = tag("T")(src)?;
+    let (src, _) = tag("T").parse(src)?;
     let (src, hours) = opt((i64, tag("H"))).parse(src)?;
     let hours = hours.map(|(n, _)| n).unwrap_or(0);
     let (src, minutes) = opt((i64, tag("M"))).parse(src)?;
     let minutes = minutes.map(|(n, _)| n).unwrap_or(0);
     let (src, seconds) = opt((i64, tag("S"))).parse(src)?;
     let seconds = seconds.map(|(n, _)| n).unwrap_or(0);
-    let (src, _) = eof(src)?;
+    let (src, _) = eof.parse(src)?;
     Ok((src, (hours, minutes, seconds)))
 }
 
 fn parse_duration(src: &str) -> IResult<&str, Duration> {
-    let (src, _) = tag("P")(src)?;
+    let (src, _) = tag("P").parse(src)?;
     let (src, negative) = opt(tag("-")).parse(src)?;
     let (src, years) = opt((u64, tag("Y"))).parse(src)?;
     let years = years.map(|(n, _)| n).unwrap_or(0);

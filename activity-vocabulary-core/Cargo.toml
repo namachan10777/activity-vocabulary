@@ -11,7 +11,7 @@ description = "Core types to represent ActivityStreams 2.0 types"
 
 [dependencies]
 chrono = { workspace = true, features = ["std"] }
-nom = { version = "7", default-features = false }
+nom = { version = "8", default-features = false }
 serde = { workspace = true, features = ["derive"] }
 serde-value.workspace = true
 serde_json.workspace = true

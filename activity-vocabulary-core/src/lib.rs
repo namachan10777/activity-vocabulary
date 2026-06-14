@@ -79,14 +79,19 @@ impl<'de, T: Deserialize<'de>> Deserialize<'de> for Property<T> {
     where
         D: serde::Deserializer<'de>,
     {
-        let content = serde::__private::de::Content::deserialize(deserializer)?;
-        let deserializer = serde::__private::de::ContentRefDeserializer::<D::Error>::new(&content);
-        match Vec::<T>::deserialize(deserializer) {
+        let value = serde_value::Value::deserialize(deserializer)?;
+        match Vec::<T>::deserialize(serde_value::ValueDeserializer::<D::Error>::new(
+            value.clone(),
+        )) {
             Ok(inner) => Ok(Self(inner)),
-            Err(seq_err) => match Option::<T>::deserialize(deserializer) {
-                Ok(inner) => Ok(Self(inner.into_iter().collect())),
-                Err(opt_err) => Err(serde::de::Error::custom(format!("{seq_err} & {opt_err}"))),
-            },
+            Err(seq_err) => {
+                match Option::<T>::deserialize(serde_value::ValueDeserializer::<D::Error>::new(
+                    value,
+                )) {
+                    Ok(inner) => Ok(Self(inner.into_iter().collect())),
+                    Err(opt_err) => Err(serde::de::Error::custom(format!("{seq_err} & {opt_err}"))),
+                }
+            }
         }
     }
 }
@@ -108,11 +113,12 @@ impl<'de, L: Deserialize<'de>, R: Deserialize<'de>> Deserialize<'de> for Or<L, R
     where
         D: serde::Deserializer<'de>,
     {
-        let content = serde::__private::de::Content::deserialize(deserializer)?;
-        let deserializer = serde::__private::de::ContentRefDeserializer::<D::Error>::new(&content);
-        match L::deserialize(deserializer) {
+        let value = serde_value::Value::deserialize(deserializer)?;
+        match L::deserialize(serde_value::ValueDeserializer::<D::Error>::new(
+            value.clone(),
+        )) {
             Ok(left) => Ok(Self::Prim(left)),
-            Err(left_err) => R::deserialize(deserializer)
+            Err(left_err) => R::deserialize(serde_value::ValueDeserializer::<D::Error>::new(value))
                 .map_err(|right_err| {
                     serde::de::Error::custom(format!("{left_err} and {right_err}"))
                 })

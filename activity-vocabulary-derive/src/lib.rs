@@ -228,7 +228,7 @@ fn collect_properties(
         .collect::<Vec<_>>();
     let properties = properties
         .into_iter()
-        .chain(type_def.properties.clone().into_iter())
+        .chain(type_def.properties.clone())
         .filter(|(name, _)| !type_def.except_properties.contains(name))
         .map(|(name, def)| rename_default_name(type_def, &name, def).map(|def| (name, def)))
         .collect::<anyhow::Result<HashMap<String, PropertyDef>>>()?;

@@ -8,8 +8,7 @@ use nom::{
     bytes::complete::tag,
     character::complete::{i64, u64},
     combinator::{eof, opt},
-    sequence::tuple,
-    IResult,
+    IResult, Parser,
 };
 use serde::{de::Visitor, Deserialize, Serialize};
 
@@ -124,11 +123,11 @@ impl Display for Duration {
 
 fn parse_duration_time_section(src: &str) -> IResult<&str, (i64, i64, i64)> {
     let (src, _) = tag("T")(src)?;
-    let (src, hours) = opt(tuple((i64, tag("H"))))(src)?;
+    let (src, hours) = opt((i64, tag("H"))).parse(src)?;
     let hours = hours.map(|(n, _)| n).unwrap_or(0);
-    let (src, minutes) = opt(tuple((i64, tag("M"))))(src)?;
+    let (src, minutes) = opt((i64, tag("M"))).parse(src)?;
     let minutes = minutes.map(|(n, _)| n).unwrap_or(0);
-    let (src, seconds) = opt(tuple((i64, tag("S"))))(src)?;
+    let (src, seconds) = opt((i64, tag("S"))).parse(src)?;
     let seconds = seconds.map(|(n, _)| n).unwrap_or(0);
     let (src, _) = eof(src)?;
     Ok((src, (hours, minutes, seconds)))
@@ -136,12 +135,12 @@ fn parse_duration_time_section(src: &str) -> IResult<&str, (i64, i64, i64)> {
 
 fn parse_duration(src: &str) -> IResult<&str, Duration> {
     let (src, _) = tag("P")(src)?;
-    let (src, negative) = opt(tag("-"))(src)?;
-    let (src, years) = opt(tuple((u64, tag("Y"))))(src)?;
+    let (src, negative) = opt(tag("-")).parse(src)?;
+    let (src, years) = opt((u64, tag("Y"))).parse(src)?;
     let years = years.map(|(n, _)| n).unwrap_or(0);
-    let (src, months) = opt(tuple((u64, tag("M"))))(src)?;
+    let (src, months) = opt((u64, tag("M"))).parse(src)?;
     let months = months.map(|(n, _)| n).unwrap_or(0);
-    let (src, days) = opt(tuple((u64, tag("D"))))(src)?;
+    let (src, days) = opt((u64, tag("D"))).parse(src)?;
     let days = days.map(|(n, _)| n).unwrap_or(0);
     let (src, (hours, minutes, seconds)) = parse_duration_time_section(src)?;
     let (_, _) = eof(src)?;

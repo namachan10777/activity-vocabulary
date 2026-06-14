@@ -23,5 +23,5 @@ url = { workspace = true, features = ["serde"] }
 
 [dev-dependencies]
 anyhow.workspace = true
-diff = "0.1.13"
+diff = "0.1"
 serde_json.workspace = true

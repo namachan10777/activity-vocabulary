@@ -261,7 +261,7 @@ fn gen_type(
         })
         .collect::<anyhow::Result<TokenStream>>()?;
     let type_name = ident(type_name);
-    let doc_uri = format!("`{}`", &type_def.uri);
+    let doc_uri = format!("`{}`", type_def.uri);
     let doc_body = &type_def.doc;
     let doc = quote!(
         #[doc = #doc_uri]
